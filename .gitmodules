@@ -1,0 +1,12 @@
+[submodule "src/panda_moveit_config"]
+	path = src/panda_moveit_config
+	url = https://github.com/ros-planning/panda_moveit_config
+[submodule "src/realsense-ros"]
+	path = src/realsense-ros
+	url = https://github.com/jethrokuan/realsense-ros
+[submodule "src/mvp_grasp"]
+	path = src/mvp_grasp
+	url = https://github.com/jethrokuan/mvp_grasp
+[submodule "src/franka_ros"]
+	path = src/franka_ros
+	url = https://github.com/jethrokuan/franka_ros
