@@ -1,0 +1,37 @@
+#+TITLE: ROS Documentation
+
+* TF
+
+In Rviz, the axes colors are as follows:
+
+- X axis :: red
+- Y axis :: green
+- Z axis :: blue
+
+* Cameras
+** Frames
+
+The ~camera_link~ frame is a center point for all other link frames to relate to. In the D400 series, this is defined as the ~camera_depth_frame~. To verify, we can run:
+
+#+BEGIN_SRC bash
+rosrun tf tf_echo camera_depth_frame camera_link
+#+END_SRC
+
+We should see:
+
+#+BEGIN_SRC text
+At time 0.000
+- Translation: [0.000, 0.000, 0.000]
+- Rotation: in Quaternion [0.000, 0.000, 0.000, 1.000]
+            in RPY (radian) [0.000, -0.000, 0.000]
+            in RPY (degree) [0.000, -0.000, 0.000]
+#+END_SRC
+
+Image data is usually published in the optical frame of the camera. In practice, this means that to obtain camera data in another base frame,
+** Realsense
+*** Camera Calibration
+
+** Image Processing
+[[https://wiki.ros.org/depth_image_proc][depth_image_proc]] is a library that processes depth images produced by cameras such as the [[Realsense]].
+
+~depth_image_proc/convert_metric~ converts raw uint16 images in mm to float depth image in m.
