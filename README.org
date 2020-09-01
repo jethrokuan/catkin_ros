@@ -1,4 +1,12 @@
 #+TITLE: ROS Documentation
+* Initial Setup
+
+This repository contains a list of ROS packages within the ~src~ directory, as submodules. To install this properly, we need to run:
+
+#+BEGIN_SRC bash
+git clone https://github.com/jethrokuan/catkin_ros/ --recursive
+rosdep install --from-paths src --ignore-src src -r -y
+#+END_SRC
 
 * TF
 
