@@ -35,3 +35,11 @@ Image data is usually published in the optical frame of the camera. In practice,
 [[https://wiki.ros.org/depth_image_proc][depth_image_proc]] is a library that processes depth images produced by cameras such as the [[Realsense]].
 
 ~depth_image_proc/convert_metric~ converts raw uint16 images in mm to float depth image in m.
+
+* AprilTag
+
+[[https://april.eecs.umich.edu/software/apriltag][AprilTag]] is a visual fiducial system that is useful for multiple robotics tasks, including camera calibration. It uses simple printed targets that look like QR codes. The [[http://wiki.ros.org/apriltag_ros][AprilTag ROS]] library is able to establish the tf transform betwen the tag and the camera.
+
+#+BEGIN_SRC bash
+rosrun apriltag_ros continuous_detection.launch
+#+END_SRC
