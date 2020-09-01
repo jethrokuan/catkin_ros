@@ -43,3 +43,19 @@ Image data is usually published in the optical frame of the camera. In practice,
 #+BEGIN_SRC bash
 rosrun apriltag_ros continuous_detection.launch
 #+END_SRC
+
+To establish a transform between a camera and a base frame (e.g. a robot), we place the april tag at a known displacement (and rotation) from the robot frame. To publish a static transfrom, we use:
+
+#+BEGIN_SRC bash
+rosrun tf static_tf_publisher ...
+#+END_SRC
+
+We use the AprilTag to compute the transform from the camera to the tag.
+
+We can then do:
+
+#+BEGIN_SRC bash
+rosrun tf tf_echo camera_link robot_frame
+#+END_SRC
+
+And save this transform for later use.
