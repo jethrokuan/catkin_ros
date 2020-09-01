@@ -10,3 +10,9 @@
 [submodule "src/franka_ros"]
 	path = src/franka_ros
 	url = https://github.com/jethrokuan/franka_ros
+[submodule "src/apriltag"]
+	path = src/apriltag
+	url = https://github.com/AprilRobotics/apriltag.git
+[submodule "src/apriltag_ros"]
+	path = src/apriltag_ros
+	url = https://github.com/AprilRobotics/apriltag_ros.git
