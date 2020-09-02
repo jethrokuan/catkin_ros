@@ -1,0 +1,27 @@
+grasp_entropy_node:
+    histogram:
+        bounds:
+            x1: -0.17
+            y1: -0.67
+            x2: 0.17
+            y2: -0.33
+        resolution: 0.005
+        bins:
+            quality: 10
+            angle: 18
+    cost:
+        dist_from_best_scale: 0.15
+        dist_from_best_gain: 0.2
+        dist_from_prev_view_scale: 0.0
+        dist_from_prev_view_gain: 0.0
+    height:
+        z1: 0.55
+        z2: 0.40
+    camera:
+        info_topic: /camera/depth/camera_info
+        depth_topic: /camera/depth/image_meters
+        camera_frame: camera_depth_optical_frame
+        base_frame: panda_link0
+        crop_size: 350
+        crop_y_offset: 40
+        fov: 65.5

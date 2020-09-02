@@ -1,0 +1,16 @@
+* Franka Control Wrapper
+
+This package wraps the [[https://github.com/jethrokuan/franka_ros/blob/a034463ea1dd41b6dbee40ffabec6940c4bff8d3/franka_example_controllers/src/cartesian_velocity_example_controller.cpp][low-level Franka Cartesian Velocity Controller]], providing a Python interface for interacting with the Franka via ~franka_control_wrappers.PandaCommander~.
+
+Some functions it provides include:
+
+1. ~goto_joints~: move to the joint positions
+2. ~goto_pose~: move to pose
+3. ~goto_pose_cartesian~: move to pose following a cartesian trajectory
+4. ~goto_named_pose~: move to a named position
+
+Gripper-related functions:
+
+1. ~home-gripper~: home and initialize the gripper
+2. ~set_gripper~: set gripper width
+3. ~grasp~: execute a grasp

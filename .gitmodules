@@ -4,9 +4,6 @@
 [submodule "src/realsense-ros"]
 	path = src/sensors/realsense-ros
 	url = https://github.com/jethrokuan/realsense-ros
-[submodule "src/mvp_grasp"]
-	path = src/mvp_grasp
-	url = https://github.com/jethrokuan/mvp_grasp
 [submodule "src/franka_ros"]
 	path = src/robots/franka_ros
 	url = https://github.com/jethrokuan/franka_ros

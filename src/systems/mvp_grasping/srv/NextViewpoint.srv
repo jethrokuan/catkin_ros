@@ -1,0 +1,5 @@
+---
+bool success
+geometry_msgs/Twist velocity_cmd
+mvp_grasping/Grasp best_grasp
+uint32 no_viewpoints
