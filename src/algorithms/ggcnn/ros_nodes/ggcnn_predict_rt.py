@@ -109,8 +109,8 @@ def depth_callback(depth_message):
         grasp_img[rr, cc, 2] = 0
 
         # Draw line representing grasp width and angle
-        x_disp = width / 2 * np.cos(ang) / fx + cx
-        y_disp = width / 2 * np.sin(ang) / fy + cy
+        x_disp = width / 2 * np.cos(ang) # / fx + cx
+        y_disp = width / 2 * np.sin(ang) # / fy + cy
         x_disp = x_disp.astype(int)
         y_disp = y_disp.astype(int)
         rr, cc = line(max_pixel[1] - x_disp, max_pixel[0] - y_disp, max_pixel[1] + x_disp, max_pixel[0] + y_disp)
