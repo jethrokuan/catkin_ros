@@ -91,8 +91,8 @@ def depth_callback(depth_message):
         point_depth = depth[max_pixel[0], max_pixel[1]]
 
         # Compute the actual position.
-        x = (max_pixel[1] - cx)/(fx) * point_depth
-        y = (max_pixel[0] - cy)/(fy) * point_depth
+        x = (max_pixel[0] - cx)/(fx) * point_depth
+        y = (max_pixel[1] - cy)/(fy) * point_depth
         z = point_depth
 
         if np.isnan(z):
