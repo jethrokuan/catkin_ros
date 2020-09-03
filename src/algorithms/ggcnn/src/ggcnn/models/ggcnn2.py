@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class GGCNN2(nn.Module):
     def __init__(self, input_channels=1, filter_sizes=None, l3_k_size=5, dilations=None):
-        super().__init__()
+        super(GGCNN2, self).__init__()
 
         if filter_sizes is None:
             filter_sizes = [16,  # First set of convs
