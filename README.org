@@ -15,8 +15,16 @@ The workspace is organized as follows:
 * Initial Setup
 
 #+BEGIN_SRC bash
+cd ~
 git clone https://github.com/jethrokuan/catkin_ros/ --recursive
-rosdep install --from-paths src --ignore-src src -r -y
+cd src/robots/libfranka
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+cd ~/catkin_ros/
+rosdep install --from-paths src --ignore-src src -r -y --skip-keys libfranka
+catkin_make_isolated -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=src/robots/libfranka/build
 #+END_SRC
 * Reference Documentation
 ** TF
