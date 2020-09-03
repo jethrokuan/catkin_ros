@@ -108,6 +108,14 @@ def depth_callback(depth_message):
         grasp_img[rr, cc, 1] = 255
         grasp_img[rr, cc, 2] = 0
 
+        # Draw line representing grasp width and angle
+        x_disp = width / 2 * np.cos(ang)
+        y_disp = width / 2 * np.sin(ang)
+        rr, cc = line(x - x_disp, y - y_disp, x + x_disp, y + y_disp)
+        grasp_img[rr, cc, 0] = 0
+        grasp_img[rr, cc, 1] = 255
+        grasp_img[rr, cc, 2] = 0
+
     with TimeIt('Publish'):
         # Publish the output images (not used for control, only visualisation)
         grasp_img = bridge.cv2_to_imgmsg(grasp_img, 'bgr8')
