@@ -46,8 +46,7 @@ def convert_pose(pose, from_frame, to_frame):
 
     try:
         trans = tfBuffer.lookup_transform(to_frame, from_frame, rospy.Time(0), rospy.Duration(1.0))
-    except e:
-        print(e)
+    except:
         rospy.logerr('FAILED TO GET TRANSFORM FROM %s to %s' % (to_frame, from_frame))
         return None
 
