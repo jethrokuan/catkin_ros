@@ -8,7 +8,7 @@ import numpy as np
 
 import cv2
 import scipy.ndimage as ndimage
-from skimage.draw import circle
+from skimage.draw import circle, line
 from skimage.feature import peak_local_max
 
 from cv_bridge import CvBridge
