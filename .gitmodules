@@ -1,9 +1,6 @@
 [submodule "src/panda_moveit_config"]
 	path = src/robots/panda_moveit_config
 	url = https://github.com/ros-planning/panda_moveit_config
-[submodule "src/realsense-ros"]
-	path = src/sensors/realsense-ros
-	url = https://github.com/jethrokuan/realsense-ros
 [submodule "src/franka_ros"]
 	path = src/robots/franka_ros
 	url = https://github.com/jethrokuan/franka_ros
