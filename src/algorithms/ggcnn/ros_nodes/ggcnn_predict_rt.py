@@ -113,7 +113,7 @@ def depth_callback(depth_message):
         y_disp = width / 2 * np.sin(ang) # / fy + cy
         x_disp = x_disp.astype(int)
         y_disp = y_disp.astype(int)
-        rr, cc = line(max_pixel[1] - x_disp, max_pixel[0] - y_disp, max_pixel[1] + x_disp, max_pixel[0] + y_disp)
+        rr, cc = line(prev_mp[1] - x_disp, prev_mp[0] - y_disp, prev_mp[1] + x_disp, prev_mp[0] + y_disp)
         grasp_img[rr, cc, 0] = 0
         grasp_img[rr, cc, 1] = 255
         grasp_img[rr, cc, 2] = 0
