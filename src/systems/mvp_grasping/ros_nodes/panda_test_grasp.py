@@ -54,9 +54,6 @@ class PandaOpenLoopGraspController(object):
                               0.6,
                               2**0.5/2, -2**0.5/2, 0, 0]
 
-        self.last_weight = 0
-        self.__weight_increase_check()
-
         self.experiment = Experiment()
 
     def __recover_robot_from_error(self):
@@ -64,15 +61,6 @@ class PandaOpenLoopGraspController(object):
         self.pc.recover()
         rospy.logerr('Done')
         self.ROBOT_ERROR_DETECTED = False
-
-    def __weight_increase_check(self):
-        try:
-            w = rospy.wait_for_message('/scales/weight', Int16, timeout=2).data
-            increased = w > self.last_weight
-            self.last_weight = w
-            return increased
-        except:
-            return raw_input('No weight. Success? [1/0]') == '1'
 
     def __robot_state_callback(self, msg):
         self.robot_state = msg
@@ -154,36 +142,36 @@ class PandaOpenLoopGraspController(object):
             self.pc.goto_pose(self.pregrasp_pose, velocity=0.25)
             self.pc.set_gripper(0.1)
 
-            self.cs.switch_controller('velocity')
+            # self.cs.switch_controller('velocity')
 
-            # run = self.experiment.new_run()
-            # run.start()
-            # grasp_ret = self.__execute_best_grasp()
-            # run.stop()
+            # # run = self.experiment.new_run()
+            # # run.start()
+            # # grasp_ret = self.__execute_best_grasp()
+            # # run.stop()
 
-            if not grasp_ret or self.ROBOT_ERROR_DETECTED:
-                rospy.logerr('Something went wrong, aborting this run')
-                if self.ROBOT_ERROR_DETECTED:
-                    self.__recover_robot_from_error()
-                continue
+            # if not grasp_ret or self.ROBOT_ERROR_DETECTED:
+            #     rospy.logerr('Something went wrong, aborting this run')
+            #     if self.ROBOT_ERROR_DETECTED:
+            #         self.__recover_robot_from_error()
+            #     continue
 
-            # Release Object
-            self.cs.switch_controller('moveit')
-            self.pc.goto_named_pose('grip_ready', velocity=0.5)
-            self.pc.goto_named_pose('drop_box', velocity=0.5)
-            self.pc.set_gripper(0.07)
+            # # Release Object
+            # self.cs.switch_controller('moveit')
+            # self.pc.goto_named_pose('grip_ready', velocity=0.5)
+            # self.pc.goto_named_pose('drop_box', velocity=0.5)
+            # self.pc.set_gripper(0.07)
 
-            # Check success using the scales.
-            rospy.sleep(1.0)
-            grasp_success = self.__weight_increase_check()
-            if not grasp_success:
-                rospy.logerr("Failed Grasp")
-            else:
-                rospy.logerr("Successful Grasp")
+            # # Check success using the scales.
+            # rospy.sleep(1.0)
+            # grasp_success = self.__weight_increase_check()
+            # if not grasp_success:
+            #     rospy.logerr("Failed Grasp")
+            # else:
+            #     rospy.logerr("Successful Grasp")
 
-            run.success = grasp_success
-            run.quality = self.best_grasp.quality
-            run.save()
+            # run.success = grasp_success
+            # run.quality = self.best_grasp.quality
+            # run.save()
 
 
 if __name__ == '__main__':
