@@ -49,9 +49,9 @@ class PandaOpenLoopGraspController(object):
         rospy.Subscriber('/franka_state_controller/franka_states', FrankaState, self.__robot_state_callback, queue_size=1)
 
         # Centre and above the bin
-        self.pregrasp_pose = [(rospy.get_param('/grasp_entropy_node/histogram/bounds/x2') + rospy.get_param('/grasp_entropy_node/histogram/bounds/x1'))/2 - 0.03,
-                              (rospy.get_param('/grasp_entropy_node/histogram/bounds/y2') + rospy.get_param('/grasp_entropy_node/histogram/bounds/y1'))/2 + 0.10,
-                              rospy.get_param('/grasp_entropy_node/height/z1') + 0.05,
+        self.pregrasp_pose = [-0.03,
+                              -1/2 + 0.10,
+                              0.6,
                               2**0.5/2, -2**0.5/2, 0, 0]
 
         self.last_weight = 0
