@@ -58,15 +58,6 @@ class PandaOpenLoopGraspController(object):
         rospy.logerr('Done')
         self.ROBOT_ERROR_DETECTED = False
 
-    def __weight_increase_check(self):
-        try:
-            w = rospy.wait_for_message('/scales/weight', Int16, timeout=2).data
-            increased = w > self.last_weight
-            self.last_weight = w
-            return increased
-        except:
-            return raw_input('No weight. Success? [1/0]') == '1'
-
     def __robot_state_callback(self, msg):
         self.robot_state = msg
         if any(self.robot_state.cartesian_collision):
@@ -91,6 +82,8 @@ class PandaOpenLoopGraspController(object):
 
             tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
 
+            print(best_grasp)
+            
             if raw_input('Continue?') == '0':
                 return False
 
@@ -99,7 +92,7 @@ class PandaOpenLoopGraspController(object):
             LINK_EE_OFFSET = 0.138
 
             # Add some limits, plus a starting offset.
-            best_grasp.pose.position.z = max(best_grasp.pose.position.z - 0.055, 0.026)  # 0.021 = collision with ground
+            best_grasp.pose.position.z = max(best_grasp.pose.position.z - 0.1, 0.55)  # 0.021 = collision with ground
             best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end efector position to
 
             self.pc.set_gripper(best_grasp.width, wait=False)
