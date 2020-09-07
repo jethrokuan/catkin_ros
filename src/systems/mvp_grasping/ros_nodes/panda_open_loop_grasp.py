@@ -92,7 +92,7 @@ class PandaOpenLoopGraspController(object):
             LINK_EE_OFFSET = 0.138
 
             # Add some limits, plus a starting offset.
-            best_grasp.pose.position.z = max(best_grasp.pose.position.z - 0.1, 0.55)  # 0.021 = collision with ground
+            best_grasp.pose.position.z = best_grasp.pose.position.z - 0.55
             best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end efector position to
 
             self.pc.set_gripper(best_grasp.width, wait=False)
