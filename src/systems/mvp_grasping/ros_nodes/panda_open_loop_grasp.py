@@ -52,17 +52,6 @@ class PandaOpenLoopGraspController(object):
         self.BAD_UPDATE = False
         rospy.Subscriber('/franka_state_controller/franka_states', FrankaState, self.__robot_state_callback, queue_size=1)
 
-        # Centre and above the bin
-        self.pregrasp_pose = [(rospy.get_param('/grasp_entropy_node/histogram/bounds/x2') + rospy.get_param('/grasp_entropy_node/histogram/bounds/x1'))/2 - 0.03,
-                              (rospy.get_param('/grasp_entropy_node/histogram/bounds/y2') + rospy.get_param('/grasp_entropy_node/histogram/bounds/y1'))/2 + 0.10,
-                              rospy.get_param('/grasp_entropy_node/height/z1') + 0.05,
-                              2**0.5/2, -2**0.5/2, 0, 0]
-
-        self.last_weight = 0
-        self.__weight_increase_check()
-
-        self.experiment = Experiment()
-
     def __recover_robot_from_error(self):
         rospy.logerr('Recovering')
         self.pc.recover()
@@ -110,7 +99,7 @@ class PandaOpenLoopGraspController(object):
             LINK_EE_OFFSET = 0.138
 
             # Add some limits, plus a starting offset.
-            best_grasp.pose.position.z = max(best_grasp.pose.position.z - 0.01, 0.026)  # 0.021 = collision with ground
+            best_grasp.pose.position.z = max(best_grasp.pose.position.z - 0.055, 0.026)  # 0.021 = collision with ground
             best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end efector position to
 
             self.pc.set_gripper(best_grasp.width, wait=False)
@@ -128,8 +117,7 @@ class PandaOpenLoopGraspController(object):
             while self.robot_state.O_T_EE[-2] > best_grasp.pose.position.z and not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:
                 self.curr_velo_pub.publish(v)
                 rospy.sleep(0.01)
-            v.linear.z = 0
-            self.curr_velo_pub.publish(v)
+            
 
             # Check for collisions
             if self.ROBOT_ERROR_DETECTED:
@@ -138,6 +126,16 @@ class PandaOpenLoopGraspController(object):
             # close the fingers.
             rospy.sleep(0.2)
             self.pc.grasp(0, force=2)
+
+            best_grasp.pose.position.z += 0.1 # Raise robot arm by 10cm
+
+            v.linear.z = 0.05
+            while self.robot_state.O_T_EE[-2] > best_grasp.pose.position.z and not self.ROBOT_ERROR_DETECTED:
+                self.curr_velo_pub.publish(v)
+                rospy.sleep(0.01)
+
+            v.linear.z = 0
+            self.curr_velo_pub.publish(v)
 
             # Sometimes triggered by closing on something that pushes the robot
             if self.ROBOT_ERROR_DETECTED:
@@ -151,44 +149,15 @@ class PandaOpenLoopGraspController(object):
         self.curr_velo_pub.publish(self.curr_velo)
 
     def go(self):
-        raw_input('Press Enter to Start.')
-        while not rospy.is_shutdown():
-            self.cs.switch_controller('moveit')
-            self.pc.goto_named_pose('grip_ready', velocity=0.25)
-            self.pc.goto_pose(self.pregrasp_pose, velocity=0.25)
-            self.pc.set_gripper(0.1)
+        self.cs.switch_controller('moveit')
+        self.pc.set_gripper(0.1)
 
-            self.cs.switch_controller('velocity')
-
-            run = self.experiment.new_run()
-            run.start()
-            grasp_ret = self.__execute_best_grasp()
-            run.stop()
-
-            if not grasp_ret or self.ROBOT_ERROR_DETECTED:
-                rospy.logerr('Something went wrong, aborting this run')
-                if self.ROBOT_ERROR_DETECTED:
-                    self.__recover_robot_from_error()
-                continue
-
-            # Release Object
-            self.cs.switch_controller('moveit')
-            self.pc.goto_named_pose('grip_ready', velocity=0.5)
-            self.pc.goto_named_pose('drop_box', velocity=0.5)
-            self.pc.set_gripper(0.07)
-
-            # Check success using the scales.
-            rospy.sleep(1.0)
-            grasp_success = self.__weight_increase_check()
-            if not grasp_success:
-                rospy.logerr("Failed Grasp")
-            else:
-                rospy.logerr("Successful Grasp")
-
-            run.success = grasp_success
-            run.quality = self.best_grasp.quality
-            run.save()
-
+        self.cs.switch_controller('velocity')
+        grasp_ret = self.__execute_best_grasp()
+        if not grasp_ret or self.ROBOT_ERROR_DETECTED:
+            rospy.logerr('Something went wrong, aborting this run')
+            if self.ROBOT_ERROR_DETECTED:
+                self.__recover_robot_from_error()
 
 if __name__ == '__main__':
     rospy.init_node('panda_open_loop_grasp')
