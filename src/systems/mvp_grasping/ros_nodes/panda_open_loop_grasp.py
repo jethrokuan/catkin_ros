@@ -45,7 +45,7 @@ class PandaOpenLoopGraspController(object):
         self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
                                    'velocity': 'cartesian_velocity_node_controller'})
         self.cs.switch_controller('moveit')
-        self.pc = PandaCommander(group_name='panda_arm_hand')
+        self.pc = PandaCommander(group_name='panda_arm')
 
         self.robot_state = None
         self.ROBOT_ERROR_DETECTED = False
