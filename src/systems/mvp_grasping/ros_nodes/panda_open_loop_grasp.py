@@ -92,7 +92,7 @@ class PandaOpenLoopGraspController(object):
             LINK_EE_OFFSET = 0.138
 
             # Add some limits, plus a starting offset.
-            best_grasp.pose.position.z = best_grasp.pose.position.z - 0.55
+            best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
             best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end efector position to
 
             self.pc.set_gripper(best_grasp.width, wait=False)
@@ -111,7 +111,6 @@ class PandaOpenLoopGraspController(object):
                 self.curr_velo_pub.publish(v)
                 rospy.sleep(0.01)
             
-
             # Check for collisions
             if self.ROBOT_ERROR_DETECTED:
                 return False
@@ -120,20 +119,21 @@ class PandaOpenLoopGraspController(object):
             rospy.sleep(0.2)
             self.pc.grasp(0, force=2)
 
-            best_grasp.pose.position.z += 0.1 # Raise robot arm by 10cm
+            best_grasp.pose.position.z += 0.2 # Raise robot arm by 10cm
 
             v.linear.z = 0.05
-            while self.robot_state.O_T_EE[-2] > best_grasp.pose.position.z and not self.ROBOT_ERROR_DETECTED:
+            while self.robot_state.O_T_EE[-2] < best_grasp.pose.position.z and not self.ROBOT_ERROR_DETECTED:
                 self.curr_velo_pub.publish(v)
                 rospy.sleep(0.01)
 
             v.linear.z = 0
             self.curr_velo_pub.publish(v)
-
+            self.pc.set_gripper(0.1)
+            
             # Sometimes triggered by closing on something that pushes the robot
             if self.ROBOT_ERROR_DETECTED:
                 return False
-
+            
             return True
 
     def stop(self):
