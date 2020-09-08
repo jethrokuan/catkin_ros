@@ -7,11 +7,13 @@ import rospy
 import os
 import time
 import datetime
+import numpy as np
 
 
 from std_msgs.msg import Int16
 from geometry_msgs.msg import Twist
 from franka_msgs.msg import FrankaState, Errors as FrankaErrors
+import tf.transformations as tft
 
 from franka_control_wrappers.panda_commander import PandaCommander
 
@@ -81,6 +83,11 @@ class PandaOpenLoopGraspController(object):
             self.best_grasp = best_grasp
 
             tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
+
+            # Rotate quarternion by -45 deg on the z axis to account for home position being -45deg
+            q_rot = tft.quarternion_from_euler(0, 0, - np.pi/4)
+            q_new = tft.quarternion_multiply(best_grasp.pose.orientation, q_rot)
+            best_grasp.pose.orientation = q_new
 
             print(best_grasp)
             
