@@ -96,11 +96,11 @@ class PandaOpenLoopGraspController(object):
 
             # Offset for initial pose.
             initial_offset = 0.10
-            LINK_EE_OFFSET = 0.138
+            LINK_EE_OFFSET = self.robot_state.F_T_EE[14]
 
             # Add some limits, plus a starting offset.
             best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
-            best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end efector position to
+            best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end effector position to
 
             self.pc.set_gripper(best_grasp.width, wait=False)
             rospy.sleep(0.1)
