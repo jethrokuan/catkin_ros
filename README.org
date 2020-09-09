@@ -26,6 +26,16 @@ cd ~/catkin_ros/
 rosdep install --from-paths src --ignore-src src -r -y --skip-keys libfranka
 catkin_make_isolated -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=~/catkin_ros/src/robots/libfranka/build
 #+END_SRC
+
+* Future Tasks
+** TODO Update MoveIt! to latest (Melodic/Noetic/ROS 2)
+
+Current MoveIt installed in Kinetic is missing some planners that the new ~panda_moveit_config~ uses.
+
+** TODO Move to colcon build system
+
+** TODO Add Training and offline evaluation of GGCNN
+
 * Reference Documentation
 ** TF
 
