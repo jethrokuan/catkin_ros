@@ -85,7 +85,6 @@ class GGCNNService:
             points, angle, width_img, _ = predict(depth_crop, process_depth=False, depth_nan_mask=depth_nan_mask, filters=(2.0, 2.0, 2.0))
 
             # Mask Points Here
-
             angle -= np.arcsin(camera_rot[0, 1])  # Correct for the rotation of the camera
             angle = (angle + np.pi/2) % np.pi - np.pi/2  # Wrap [-np.pi/2, np.pi/2]
 
