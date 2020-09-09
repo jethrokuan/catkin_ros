@@ -62,7 +62,9 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
-
+  <exec_depend>panda_moveit_config</exec_depend>
+  <exec_depend>realsense2_camera</exec_depend>
+  <exec_depend>rs_rgbd</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
