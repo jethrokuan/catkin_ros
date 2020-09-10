@@ -18,8 +18,8 @@ from franka_control_wrappers.panda_commander import PandaCommander
 import dougsm_helpers.tf_helpers as tfh
 from dougsm_helpers.ros_control import ControlSwitcher
 
-from ggcnn.msg import Grasp
-from ggcnn.srv import GraspPrediction
+from ggrasp.msg import Grasp
+from ggrasp.srv import GraspPrediction
 
 from mvp_grasping.panda_base_grasping_controller import Logger, Run, Experiment
 
@@ -78,7 +78,7 @@ class PandaOpenLoopGraspController(object):
     def __execute_best_grasp(self):
             self.cs.switch_controller('moveit')
 
-            ret = self.ggcnn_srv.call()
+            ret = self.ggrasp_srv.call()
             if not ret.success:
                 return False
             best_grasp = ret.best_grasp

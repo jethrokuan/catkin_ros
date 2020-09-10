@@ -1,0 +1,44 @@
+- package: gpkg.ggrasp
+  version: 0.0.1
+
+- model: grconvnet
+  description: >
+    GR-ConvNet (IROS 2020)
+    See https://arxiv.org/abs/1909.04810v1
+  operations:
+    train:
+      description: Train the GR-ConvNet model
+      main: ggrasp.train
+      flags:
+        network: GRConvNet
+        use-depth: 1
+        use-rgb: 0
+        dataset: CornellDataset
+        dataset-path:
+          required: true
+        batch-size: 8
+        epochs: 50
+        lr: 0.001
+        loss: mse_loss
+        smoothness_weight: 0.5
+
+- model: ggcnn2
+  description: >
+    GG-CNN (RSS 2018)
+    See https://arxiv.org/abs/1804.05172
+  operations:
+    train:
+      description: Train the GG-CNN model
+      main: ggrasp.train
+      flags:
+        network: GGCNN2
+        use-depth: 1
+        use-rgb: 0
+        dataset: CornellDataset
+        dataset-path:
+          required: true
+        batch-size: 8
+        epochs: 50
+        lr: 0.001
+        loss: mse_loss
+        smoothness_weight: 0.5

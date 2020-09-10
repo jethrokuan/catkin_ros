@@ -4,3 +4,7 @@
 /build_isolated/
 /devel_isolated/
 **/*.pyc
+**/*/.venv/
+**/*/*.egg-info/
+**/*/.pyc
+**/*/build/
