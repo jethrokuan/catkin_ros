@@ -156,7 +156,7 @@ if args is not None:
 device = torch.device("cuda")
 
 # Load Dataset
-logging.info('Loading {} Dataset...'.format(args.dataset.title()))
+logging.info('Loading {} Dataset...'.format(args.dataset))
 Dataset = get_dataset(args.dataset)
 dataset = Dataset(args.dataset_path,
                   random_rotate=True,
