@@ -7,7 +7,6 @@ import sys
 
 import cv2
 import numpy as np
-import tensorboardX
 import torch
 import torch.optim as optim
 import torch.utils.data
