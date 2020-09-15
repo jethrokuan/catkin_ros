@@ -9,7 +9,7 @@ import torch
 
 import cv2
 import scipy.ndimage as ndimage
-from skimage.draw import circle, line
+from skimage.draw import circle
 from skimage.feature import peak_local_max
 
 from cv_bridge import CvBridge
@@ -109,14 +109,6 @@ def depth_callback(depth_message):
         grasp_img_plain = grasp_img.copy()
 
         rr, cc = circle(prev_mp[0], prev_mp[1], 5)
-        grasp_img[rr, cc, 0] = 0
-        grasp_img[rr, cc, 1] = 255
-        grasp_img[rr, cc, 2] = 0
-
-        # Draw line representing grasp width and angle
-        x_disp = width / 2 * np.cos(ang)
-        y_disp = width / 2 * np.sin(ang)
-        rr, cc = line(x - x_disp, y - y_disp, x + x_disp, y + y_disp)
         grasp_img[rr, cc, 0] = 0
         grasp_img[rr, cc, 1] = 255
         grasp_img[rr, cc, 2] = 0
