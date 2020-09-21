@@ -1,13 +1,9 @@
 <?xml version="1.0" ?>
 <!DOCTYPE launch>
 <launch>
-  <arg name="robot_ip" default="172.16.0.2" />
+  <arg name="robot_ip" default="172.16.0.3" />
   <arg name="launch_rviz" default="true" />
   <arg name="load_gripper" default="true" />
-
-  <include file="$(find franka_control)/launch/franka_control.launch">
-    <arg name="robot_ip" value="$(arg robot_ip)" />
-  </include>
 
   <!-- Set some project specific defaults for the panda arm. -->
   <node name="set_robot_defaults" pkg="franka_control_wrappers" type="set_panda_defaults.py" respawn="false" output="screen"/>
