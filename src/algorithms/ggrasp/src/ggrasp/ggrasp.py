@@ -83,7 +83,7 @@ def predict(depth, model, process_depth=True, crop_size=300, out_size=300, depth
 
     # Inference
     depth = np.clip((depth - depth.mean()), -1, 1)
-    depthT = torch.from_numpy(depth.reshape(1, 1, out_size, out_size).astype(np.float32)).to(depth.get_device())
+    depthT = torch.from_numpy(depth.reshape(1, 1, out_size, out_size).astype(np.float32)).to(next(model.parameters()).device)
     with torch.no_grad():
         pos_out, cos_out, sin_out, width_out = model(depthT)
 
