@@ -41,6 +41,7 @@ class PandaClosedLoopGraspController(object):
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
         self.max_velo = 0.10
+        self.velo_scale = 0.1
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
 
@@ -72,10 +73,31 @@ class PandaClosedLoopGraspController(object):
                     rospy.logerr('Robot Error Detected')
                 self.ROBOT_ERROR_DETECTED = True
 
-    def dist(target):
+    def get_velocity(self, target_pose):
         """Returns the distance from the target grasp from the current pose."""
+        current_pose = self.pc.get_current_pose()
+        v = Twist()
+        v.linear.x = target_pose.position.x - current_pose.position.x
+        v.linear.y = target_pose.position.y - current_pose.position.y
+        v.linear.z = target_pose.position.z - current_pose.position.z
+        current_euler = tft.euler_from_quaternion(tfh.quaternion_to_list(current_pose.orientation))
+        target_euler = tft.euler_from_quaternion(tfh.quaternion_to_list(target_pose.orientation))
+        angular_diff = target_euler - current_euler
+        v.angular.x = angular_diff[0]
+        v.angular.y = angular_diff[1]
+        v.angular.z = angular_diff[2]
 
-    def __execute_best_grasp(self):
+        v.linear.x = self.velo_scale * v.linear.x
+        v.linear.y = self.velo_scale * v.linear.y
+        v.linear.z = self.velo_scale * v.linear.z
+        v.angular.x = self.velo_scale * v.angular.x
+        v.angular.y = self.velo_scale * v.angular.y
+        v.angular.z = self.velo_scale * v.angular.z
+        
+        
+        return v
+
+    def __execute_grasp(self):
             self.cs.switch_controller('moveit')
 
             ret = self.ggrasp_srv.call()
@@ -92,31 +114,10 @@ class PandaClosedLoopGraspController(object):
             best_grasp.pose.orientation = q_new
 
             print(best_grasp)
-            
-            if raw_input('Continue?') == '0':
-                return False
-
-            # Offset for initial pose.
-            initial_offset = 0.10
-            gripper_width_offset = 0.03
-            LINK_EE_OFFSET = self.robot_state.F_T_EE[14]
-
-            # Add some limits, plus a starting offset.
-            best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
-            best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end effector position to
-
-            self.pc.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
-            rospy.sleep(0.1)
-            self.pc.goto_pose(best_grasp.pose, velocity=0.1)
-
-            # Reset the position
-            best_grasp.pose.position.z -= initial_offset + LINK_EE_OFFSET
 
             self.cs.switch_controller('velocity')
-            v = Twist()
-            v.linear.z = -0.05
+            v = self.get_velocity(best_grasp)
 
-            # Monitor robot state and descend
             while self.robot_state.O_T_EE[-2] > best_grasp.pose.position.z and not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:
                 self.curr_velo_pub.publish(v)
                 rospy.sleep(0.01)
@@ -154,7 +155,7 @@ class PandaClosedLoopGraspController(object):
     def go(self):
         self.cs.switch_controller('moveit')
         self.pc.set_gripper(0.1)
-        print(self.pc.get_current_pose())
+        self.__execute_grasp()
         # self.cs.switch_controller('velocity')
         # grasp_ret = self.__execute_best_grasp()
         # if not grasp_ret or self.ROBOT_ERROR_DETECTED:
