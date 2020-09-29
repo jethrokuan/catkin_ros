@@ -3,7 +3,7 @@ cartesian_velocity_node_controller:
     arm_id: panda
     # If no new velocity commands are received in time (seconds)
     # Then set 0 velocity.
-    max_duration_between_commands: 0.025
+    max_duration_between_commands: 1 # temp
     rate_limiting:
         linear:
             velocity: 0.5

@@ -50,7 +50,8 @@ class PandaClosedLoopGraspController(object):
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
 
-        self.cs = ControlSwitcher({'velocity': 'cartesian_velocity_node_controller'})
+        self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
+                                   'velocity': 'cartesian_velocity_node_controller'})
         self.cs.switch_controller('velocity')
         self.pc = PandaCommander(group_name='panda_arm')
 
@@ -149,7 +150,7 @@ class PandaClosedLoopGraspController(object):
         rospy.sleep(0.2)
         self.pc.grasp(0, force=1)
 
-        best_grasp.pose.position.z += 0.2 # Raise robot arm by 10cm
+        self.best_grasp.pose.position.z += 0.2 # Raise robot arm by 10cm
 
         v.linear.z = 0.05
         while self.robot_state.O_T_EE[-2] < self.best_grasp.pose.position.z and not self.ROBOT_ERROR_DETECTED:
