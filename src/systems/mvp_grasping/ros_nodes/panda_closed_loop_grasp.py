@@ -42,6 +42,11 @@ class PandaClosedLoopGraspController(object):
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
         self.max_velo = 0.10
         self.velo_scale = 0.1
+
+        self.initial_offset = 0.10
+        self.gripper_width_offset = 0.03
+        self.LINK_EE_OFFSET = self.robot_state.F_T_EE[14]
+        
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
 
@@ -73,79 +78,93 @@ class PandaClosedLoopGraspController(object):
                     rospy.logerr('Robot Error Detected')
                 self.ROBOT_ERROR_DETECTED = True
 
-    def get_velocity(self, target_pose):
+    def get_grasp(self):
+        ret = self.ggrasp_srv.call()
+        if not ret.success:
+            return False
+        best_grasp = ret.best_grasp
+        self.best_grasp = best_grasp
+
+        tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
+
+        # Rotate quaternion by 45 deg on the z axis to account for home position being -45deg
+        q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
+        q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
+        best_grasp.pose.orientation = q_new
+        best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
+        best_grasp.pose.position.z += self.initial_offset + self.LINK_EE_OFFSET # Offset from end effector position to
+
+        return best_grasp
+    
+    def get_velocity(self):
         """Returns the distance from the target grasp from the current pose."""
+        self.best_grasp = self.get_grasp()
+        if not self.best_grasp:
+            return False
+
+        target_pose = self.best_grasp.pose
         current_pose = self.pc.get_current_pose()
+        
         v = Twist()
         v.linear.x = target_pose.position.x - current_pose.position.x
         v.linear.y = target_pose.position.y - current_pose.position.y
         v.linear.z = target_pose.position.z - current_pose.position.z
+
+        # v.angular.x,y = 0
         current_euler = tft.euler_from_quaternion(tfh.quaternion_to_list(current_pose.orientation))
         target_euler = tft.euler_from_quaternion(tfh.quaternion_to_list(target_pose.orientation))
-        angular_diff = target_euler - current_euler
-        v.angular.x = angular_diff[0]
-        v.angular.y = angular_diff[1]
-        v.angular.z = angular_diff[2]
+        v.angular.z = target_euler[2] - current_euler[2]
 
         v.linear.x = self.velo_scale * v.linear.x
         v.linear.y = self.velo_scale * v.linear.y
         v.linear.z = self.velo_scale * v.linear.z
-        v.angular.x = self.velo_scale * v.angular.x
-        v.angular.y = self.velo_scale * v.angular.y
         v.angular.z = self.velo_scale * v.angular.z
-        
-        
+                
         return v
 
     def __execute_grasp(self):
-            self.cs.switch_controller('moveit')
+        self.cs.switch_controller('velocity')
 
-            ret = self.ggrasp_srv.call()
-            if not ret.success:
-                return False
-            best_grasp = ret.best_grasp
-            self.best_grasp = best_grasp
-
-            tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
-
-            # Rotate quaternion by 45 deg on the z axis to account for home position being -45deg
-            q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
-            q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
-            best_grasp.pose.orientation = q_new
-
-            print(best_grasp)
-
-            self.cs.switch_controller('velocity')
-            v = self.get_velocity(best_grasp)
-
-            while self.robot_state.O_T_EE[-2] > best_grasp.pose.position.z and not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:
+        while self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z and not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:            
+            v = self.get_velocity()
+            if not v:
+                break
+            else:
                 self.curr_velo_pub.publish(v)
-                rospy.sleep(0.01)
-            
-            # Check for collisions
-            if self.ROBOT_ERROR_DETECTED:
-                return False
+            rospy.sleep(0.01)
 
-            # close the fingers.
-            rospy.sleep(0.2)
-            self.pc.grasp(0, force=1)
-
-            best_grasp.pose.position.z += 0.2 # Raise robot arm by 10cm
-
-            v.linear.z = 0.05
-            while self.robot_state.O_T_EE[-2] < best_grasp.pose.position.z and not self.ROBOT_ERROR_DETECTED:
-                self.curr_velo_pub.publish(v)
-                rospy.sleep(0.01)
-
-            v.linear.z = 0
+        self.best_grasp.pose.position.z -= self.initial_offset + self.LINK_EE_OFFSET
+        self.cs.switch_controller('velocity')
+        v = Twist()
+        v.linear.z = -0.05
+        while self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z and not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:
             self.curr_velo_pub.publish(v)
-            self.pc.set_gripper(0.1)
+            rospy.sleep(0.01)
             
-            # Sometimes triggered by closing on something that pushes the robot
-            if self.ROBOT_ERROR_DETECTED:
-                return False
+        # Check for collisions
+        if self.ROBOT_ERROR_DETECTED:
+            return False
+
+        # close the fingers.
+        rospy.sleep(0.2)
+        self.pc.grasp(0, force=1)
+
+        best_grasp.pose.position.z += 0.2 # Raise robot arm by 10cm
+
+        v.linear.z = 0.05
+        while self.robot_state.O_T_EE[-2] < self.best_grasp.pose.position.z and not self.ROBOT_ERROR_DETECTED:
+            self.curr_velo_pub.publish(v)
+            rospy.sleep(0.01)
+
+        v.linear.z = 0
+        self.curr_velo_pub.publish(v)
+        self.pc.set_gripper(0.1)
             
-            return True
+        # Sometimes triggered by closing on something that pushes the robot
+        if self.ROBOT_ERROR_DETECTED:
+            return False
+            
+        return True
 
     def stop(self):
         self.pc.stop()
