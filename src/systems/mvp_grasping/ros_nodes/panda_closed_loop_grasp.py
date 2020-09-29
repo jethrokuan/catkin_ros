@@ -163,6 +163,6 @@ class PandaClosedLoopGraspController(object):
         #         self.__recover_robot_from_error()
 
 if __name__ == '__main__':
-    rospy.init_node('panda_open_loop_grasp')
-    pg = PandaOpenLoopGraspController()
+    rospy.init_node('panda_closed_loop_grasp')
+    pg = PandaClosedLoopGraspController()
     pg.go()
