@@ -75,6 +75,23 @@ class PandaCommander(object):
         self.active_group.stop()
         return success
 
+    def get_current_pose(self, group_name=None):
+        """
+        Returns the current pose of thet robot.
+        """
+
+        group = None
+        if group_name:
+            self.groups[group_name]
+        else:
+            group = self.active_group
+
+        if not group:
+            ValueError("Cannot find group")
+
+        return group.get_current_pose().pose
+        
+
     def goto_pose(self, pose, velocity=1.0, group_name=None, wait=True):
         """
         Move to pose
