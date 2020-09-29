@@ -96,13 +96,14 @@ class PandaOpenLoopGraspController(object):
 
             # Offset for initial pose.
             initial_offset = 0.10
+            gripper_width_offset = 0.03
             LINK_EE_OFFSET = self.robot_state.F_T_EE[14]
 
             # Add some limits, plus a starting offset.
             best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
             best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end effector position to
 
-            self.pc.set_gripper(best_grasp.width, wait=False)
+            self.pc.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
             rospy.sleep(0.1)
             self.pc.goto_pose(best_grasp.pose, velocity=0.1)
 
@@ -124,7 +125,7 @@ class PandaOpenLoopGraspController(object):
 
             # close the fingers.
             rospy.sleep(0.2)
-            self.pc.grasp(0, force=2)
+            self.pc.grasp(0, force=1)
 
             best_grasp.pose.position.z += 0.2 # Raise robot arm by 10cm
 
