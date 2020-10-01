@@ -49,6 +49,7 @@ class PandaOpenLoopGraspController(object):
         self.cs.switch_controller('moveit')
         self.pc = PandaCommander(group_name='panda_arm')
 
+        self.initial_pose = None
         self.robot_state = None
         self.ROBOT_ERROR_DETECTED = False
         self.BAD_UPDATE = False
@@ -89,14 +90,9 @@ class PandaOpenLoopGraspController(object):
             q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
             best_grasp.pose.orientation = q_new
 
-            print(best_grasp)
-            
-            if raw_input('Continue?') == '0':
-                return False
-
             # Offset for initial pose.
             initial_offset = 0.10
-            gripper_width_offset = 0.03
+            gripper_width_offset = 0.01
             LINK_EE_OFFSET = self.robot_state.F_T_EE[14]
 
             # Add some limits, plus a starting offset.
@@ -123,20 +119,11 @@ class PandaOpenLoopGraspController(object):
             if self.ROBOT_ERROR_DETECTED:
                 return False
 
+            self.cs.switch_controller('moveit')
             # close the fingers.
             rospy.sleep(0.2)
             self.pc.grasp(0, force=1)
-
-            best_grasp.pose.position.z += 0.2 # Raise robot arm by 10cm
-
-            v.linear.z = 0.05
-            while self.robot_state.O_T_EE[-2] < best_grasp.pose.position.z and not self.ROBOT_ERROR_DETECTED:
-                self.curr_velo_pub.publish(v)
-                rospy.sleep(0.01)
-
-            v.linear.z = 0
-            self.curr_velo_pub.publish(v)
-            self.pc.set_gripper(0.1)
+            self.pc.goto_pose(self.initial_pose)
             
             # Sometimes triggered by closing on something that pushes the robot
             if self.ROBOT_ERROR_DETECTED:
@@ -150,6 +137,7 @@ class PandaOpenLoopGraspController(object):
         self.curr_velo_pub.publish(self.curr_velo)
 
     def go(self):
+        self.initial_pose = self.pc.get_current_pose()
         self.cs.switch_controller('moveit')
         self.pc.set_gripper(0.1)
 
