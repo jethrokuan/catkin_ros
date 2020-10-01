@@ -9,7 +9,6 @@ import time
 import datetime
 import numpy as np
 
-from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Int16
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Twist
@@ -22,7 +21,6 @@ import dougsm_helpers.tf_helpers as tfh
 from dougsm_helpers.ros_control import ControlSwitcher
 
 from ggrasp.msg import Grasp
-from ggrasp.srv import GraspPrediction
 
 from mvp_grasping.panda_base_grasping_controller import Logger, Run, Experiment
 
@@ -40,7 +38,7 @@ class PandaClosedLoopGraspController(object):
 
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
-        self.grasp_sub = rospy.Subscriber("/ggrasp/out/command", Float32MultiArray, self.grasp_cmd_callback, queue_size=1)
+        self.grasp_sub = rospy.Subscriber("/ggrasp/predict", Grasp, self.grasp_cmd_callback, queue_size=1)
         self.max_velo = 0.10
         self.velo_scale = 0.15
 
@@ -62,7 +60,7 @@ class PandaClosedLoopGraspController(object):
         rospy.Subscriber('/franka_state_controller/franka_states', FrankaState, self.__robot_state_callback, queue_size=1)
 
     def grasp_cmd_callback(self, msg):
-        best_grasp = ret.best_grasp
+        best_grasp = msg
         
         tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
 
