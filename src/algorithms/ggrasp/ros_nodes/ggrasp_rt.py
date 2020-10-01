@@ -55,6 +55,8 @@ class GGraspRt:
         # Doing a rospy.wait_for_message is super slow, compared to just subscribing and keeping the newest one.
         self.curr_img_time = time.time()
         self.last_image_pose = tfh.current_robot_pose(self.base_frame, self.camera_frame)
+        if not self.last_image_pose:
+            return
         self.curr_depth_img = bridge.imgmsg_to_cv2(msg)
 
         depth = self.curr_depth_img.copy()
