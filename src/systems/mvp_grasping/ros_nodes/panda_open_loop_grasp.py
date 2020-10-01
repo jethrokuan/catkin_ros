@@ -35,7 +35,7 @@ class PandaOpenLoopGraspController(object):
     Perform open-loop grasps from a single viewpoint using the Panda robot.
     """
     def __init__(self):
-        ggrasp_service_name = '/ggrasp_service'
+        ggrasp_service_name = '/ggrasp'
         rospy.wait_for_service(ggrasp_service_name + '/predict')
         self.ggrasp_srv = rospy.ServiceProxy(ggrasp_service_name + '/predict', GraspPrediction)
         self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)

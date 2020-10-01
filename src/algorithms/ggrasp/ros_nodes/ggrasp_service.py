@@ -120,7 +120,7 @@ class GGraspService:
 
 
 if __name__ == '__main__':
-    rospy.init_node('ggrasp_service')
+    rospy.init_node('ggrasp')
     import dougsm_helpers.tf_helpers as tfh
     GGrasp = GGraspService()
     rospy.spin()

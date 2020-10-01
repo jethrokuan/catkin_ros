@@ -1,4 +1,4 @@
-ggrasp_service:
+ggrasp:
   model: ggcnn_l1_smooth_0.5_iou_0.97
   camera:
     info_topic: /camera/depth/camera_info
