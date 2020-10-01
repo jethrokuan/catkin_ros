@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="yaml_path" default="$(optenv YAML_PATH)"/>
+  <rosparam command="load" file="$(find mvp_grasping)/cfg/mvp_grasp.yaml" />
+  <rosparam command="load" file="$(find ggrasp)/cfg/ggrasp_service.yml" />
+  <node name="ggrasp_rt" pkg="ggrasp" type="ggrasp_rt.py" output="screen"/>
+</launch>
