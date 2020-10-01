@@ -1,5 +1,5 @@
 ggrasp:
-  model: ggcnn_l1_smooth_0.5_iou_0.97
+  model: ggcnn_jacquard_smooth_0.5_iou_0.77
   camera:
     info_topic: /camera/depth/camera_info
     depth_topic: /camera/depth/image_meters
