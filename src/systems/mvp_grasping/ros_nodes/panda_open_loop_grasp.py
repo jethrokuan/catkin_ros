@@ -11,6 +11,7 @@ import numpy as np
 
 
 from std_msgs.msg import Int16
+from std_srvs.srv import Empty
 from geometry_msgs.msg import Twist
 from franka_msgs.msg import FrankaState, Errors as FrankaErrors
 import tf.transformations as tft
@@ -37,6 +38,7 @@ class PandaOpenLoopGraspController(object):
         ggrasp_service_name = '/ggrasp_service'
         rospy.wait_for_service(ggrasp_service_name + '/predict')
         self.ggrasp_srv = rospy.ServiceProxy(ggrasp_service_name + '/predict', GraspPrediction)
+        self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
 
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
@@ -91,12 +93,12 @@ class PandaOpenLoopGraspController(object):
             best_grasp.pose.orientation = q_new
 
             # Offset for initial pose.
-            initial_offset = 0.10
-            gripper_width_offset = 0.01
-            LINK_EE_OFFSET = self.robot_state.F_T_EE[14]
+            initial_offset = 0.05
+            gripper_width_offset = 0.03
+            LINK_EE_OFFSET = 0.1384
 
             # Add some limits, plus a starting offset.
-            best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
+            # best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
             best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end effector position to
 
             self.pc.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
@@ -119,11 +121,13 @@ class PandaOpenLoopGraspController(object):
             if self.ROBOT_ERROR_DETECTED:
                 return False
 
+            rospy.sleep(1)
             self.cs.switch_controller('moveit')
             # close the fingers.
             rospy.sleep(0.2)
             self.pc.grasp(0, force=1)
-            self.pc.goto_pose(self.initial_pose)
+            self.clear_octomap_srv.call() # We need to clear the octomap so moveit does not complain of collisions
+            self.pc.goto_pose(self.initial_pose, velocity=0.1)
             
             # Sometimes triggered by closing on something that pushes the robot
             if self.ROBOT_ERROR_DETECTED:
@@ -147,6 +151,7 @@ class PandaOpenLoopGraspController(object):
             rospy.logerr('Something went wrong, aborting this run')
             if self.ROBOT_ERROR_DETECTED:
                 self.__recover_robot_from_error()
+        self.pc.set_gripper(0.1)
 
 if __name__ == '__main__':
     rospy.init_node('panda_open_loop_grasp')
