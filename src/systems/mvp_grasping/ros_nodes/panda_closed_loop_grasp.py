@@ -9,7 +9,7 @@ import time
 import datetime
 import numpy as np
 
-
+from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Int16
 from std_srvs.srv import Empty
 from geometry_msgs.msg import Twist
@@ -35,18 +35,16 @@ class PandaClosedLoopGraspController(object):
     Perform closed-loop grasps from a single viewpoint using the Panda robot.
     """
     def __init__(self):
-        ggrasp_service_name = '/ggrasp_service'
-        rospy.wait_for_service(ggrasp_service_name + '/predict')
         self.initial_pose = None
-        self.ggrasp_srv = rospy.ServiceProxy(ggrasp_service_name + '/predict', GraspPrediction)
         self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
 
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
+        self.grasp_sub = rospy.Subscriber("/ggrasp/out/command", Float32MultiArray, self.grasp_cmd_callback, queue_size=1)
         self.max_velo = 0.10
-        self.velo_scale = 0.5
+        self.velo_scale = 0.15
 
-        self.initial_offset = 0.05
+        self.initial_offset = 0.03
         self.gripper_width_offset = 0.03
         self.LINK_EE_OFFSET = 0.1384
         
@@ -62,6 +60,19 @@ class PandaClosedLoopGraspController(object):
         self.ROBOT_ERROR_DETECTED = False
         self.BAD_UPDATE = False
         rospy.Subscriber('/franka_state_controller/franka_states', FrankaState, self.__robot_state_callback, queue_size=1)
+
+    def grasp_cmd_callback(self, msg):
+        best_grasp = ret.best_grasp
+        
+        tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
+
+        # Rotate quaternion by 45 deg on the z axis to account for home position being -45deg
+        q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
+        q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
+        best_grasp.pose.orientation = q_new
+        best_grasp.pose.position.z += self.initial_offset + self.LINK_EE_OFFSET # Offset from end effector position to
+
+        self.best_grasp = best_grasp
 
     def __recover_robot_from_error(self):
         rospy.logerr('Recovering')
@@ -82,26 +93,8 @@ class PandaClosedLoopGraspController(object):
                     rospy.logerr('Robot Error Detected')
                 self.ROBOT_ERROR_DETECTED = True
 
-    def get_grasp(self):
-        ret = self.ggrasp_srv.call()
-        if not ret.success:
-            return False
-        best_grasp = ret.best_grasp
-        self.best_grasp = best_grasp
-
-        tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
-
-        # Rotate quaternion by 45 deg on the z axis to account for home position being -45deg
-        q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
-        q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
-        best_grasp.pose.orientation = q_new
-        best_grasp.pose.position.z += self.initial_offset + self.LINK_EE_OFFSET # Offset from end effector position to
-
-        return best_grasp
-    
     def get_velocity(self):
         """Returns the distance from the target grasp from the current pose."""
-        self.best_grasp = self.get_grasp()
         if not self.best_grasp:
             return False
 
@@ -146,6 +139,18 @@ class PandaClosedLoopGraspController(object):
         if self.ROBOT_ERROR_DETECTED:
             return False
 
+        rospy.sleep(1)
+        self.cs.switch_controller('moveit')
+        # close the fingers.
+        rospy.sleep(0.2)
+        self.pc.grasp(0, force=1)
+        self.clear_octomap_srv.call() # We need to clear the octomap so moveit does not complain of collisions
+        self.pc.goto_pose(self.initial_pose, velocity=0.1)
+
+        # Sometimes triggered by closing on something that pushes the robot
+        if self.ROBOT_ERROR_DETECTED:
+            return False
+
         return True
 
     def stop(self):
@@ -163,16 +168,6 @@ class PandaClosedLoopGraspController(object):
             rospy.logerr('Something went wrong, aborting this run')
             if self.ROBOT_ERROR_DETECTED:
                 self.__recover_robot_from_error()
-
-        rospy.sleep(1)
-        self.cs.switch_controller('moveit')
-        # close the fingers.
-        rospy.sleep(0.2)
-        self.pc.grasp(0, force=1)
-        self.clear_octomap_srv.call() # We need to clear the octomap so moveit does not complain of collisions
-        self.pc.goto_pose(self.initial_pose, velocity=0.1)
-        if self.ROBOT_ERROR_DETECTED:
-            self.__recover_robot_from_error()
         self.pc.set_gripper(0.1)
 
 if __name__ == '__main__':
