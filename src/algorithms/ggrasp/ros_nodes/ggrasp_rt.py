@@ -52,7 +52,7 @@ class GGraspRt:
         self.curr_depth_img = None
         self.curr_img_time = 0
         self.last_image_pose = None
-        self.prev_mp = np.array([224, 224])
+        self.prev_mp = None
         rospy.Subscriber(rospy.get_param('~camera/depth_topic'), Image, self._depth_img_callback, queue_size=1)
 
     def _depth_img_callback(self, msg):
@@ -89,8 +89,14 @@ class GGraspRt:
         if maxes.shape[0] == 0:
             rospy.logerror("No Local Maxes")
             return
-        best_g = maxes[np.argmin(np.linalg.norm(maxes - self.prev_mp, axis=1))]
-        self.prev_mp = (best_g * 0.25 + self.prev_mp * 0.75).astype(np.int)
+        
+        if self.prev_mp is None:
+            best_g_unr = maxes[np.argmin(np.linalg.norm(maxes, axis=1))]
+            self.prev_mp = best_g_unr
+        else:
+            best_g_unr = maxes[np.argmin(np.linalg.norm(maxes - self.prev_mp, axis=1))]
+            self.prev_mp = (best_g_unr * 0.25 + self.prev_mp * 0.75).astype(np.int)
+        best_g = np.ravel_multi_index(((best_g_unr[0]), (best_g_unr[1])), points.shape)
         best_g_unr = np.unravel_index(best_g, points.shape)
 
         g = Grasp()
@@ -101,14 +107,14 @@ class GGraspRt:
         g.width = width_m[best_g_unr]
         g.quality = points[best_g_unr]
 
-        points_annotated = points.copy()
+        grasp_img = cv2.applyColorMap((points * 255).astype(np.uint8), cv2.COLORMAP_JET)
         rr, cc = circle(self.prev_mp[0], self.prev_mp[1], 5)
-        points_annotated[rr, cc, 0] = 0
-        points_annotated[rr, cc, 1] = 255
-        points_annotated[rr, cc, 2] = 0
+        grasp_img[rr, cc, 0] = 0
+        grasp_img[rr, cc, 1] = 255
+        grasp_img[rr, cc, 2] = 0
 
         show = gridshow('Display',
-                 [depth_crop, points_annotated],
+                 [depth_crop, grasp_img],
                  [(0.30, 0.55), None, (-np.pi/2, np.pi/2)],
                  [cv2.COLORMAP_BONE, cv2.COLORMAP_JET, cv2.COLORMAP_BONE],
                  3,
