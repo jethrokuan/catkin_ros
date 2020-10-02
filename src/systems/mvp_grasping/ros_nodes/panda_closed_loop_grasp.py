@@ -40,13 +40,13 @@ class PandaClosedLoopGraspController(object):
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
         self.grasp_sub = rospy.Subscriber("/ggrasp/predict", Grasp, self.grasp_cmd_callback, queue_size=1)
         self.max_velo = 0.10
-        self.min_velo = 0.01    #  Value used to check for convergence
+        self.max_dist_to_target = 0.03    # distance to target to stop updating target pose
         self.velo_scale = 0.15
 
         self.initial_offset = 0.03
         self.gripper_width_offset = 0.03
         self.LINK_EE_OFFSET = 0.1384
-        
+
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
 
@@ -91,12 +91,16 @@ class PandaClosedLoopGraspController(object):
                     rospy.logerr('Robot Error Detected')
                 self.ROBOT_ERROR_DETECTED = True
 
-    def get_velocity(self):
-        """Returns the distance from the target grasp from the current pose."""
-        if not self.best_grasp:
-            return False
+    def get_dist(self, target_pose):
+        current_pose = self.pc.get_current_pose()
+        x = target_pose.position.x - current_pose.position.x
+        y = target_pose.position.y - current_pose.position.y
+        z = target_pose.position.z - current_pose.position.z
 
-        target_pose = self.best_grasp.pose
+        return np.sqrt(x**2 + y**2 + z**2)
+
+    def get_velocity(self, target_pose):
+        """Returns the distance from the target grasp from the current pose."""
         current_pose = self.pc.get_current_pose()
         
         v = Twist()
@@ -117,17 +121,28 @@ class PandaClosedLoopGraspController(object):
         return v
 
     def __execute_grasp(self):
-        while not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:            
-            v = self.get_velocity()
-            if not v or v < self.min_velo:
+        dist_to_target = 10000
+        target_pose = None
+        while not any(self.robot_state.cartesian_contact) \
+              and not self.ROBOT_ERROR_DETECTED \
+              and dist_to_target > self.max_dist_to_target:
+            if not self.best_grasp:
                 break
-            else:
-                self.curr_velo_pub.publish(v)
+            target_pose = self.best_grasp.pose
+            v = self.get_velocity(target_pose)
+            self.curr_velo_pub.publish(v)
             rospy.sleep(0.01)
 
         # Check for collisions
         if self.ROBOT_ERROR_DETECTED:
             return False
+
+        while not any(self.robot_state.cartesian_contact) \
+              and not self.ROBOT_ERROR_DETECTED \
+              and abs(dist_to_target - self.max_dist_to_target) > 0.01:
+            v = self.get_velocity(target_pose)
+            self.curr_velo_pub.publish(v)
+            rospy.sleep(0.01)
 
         rospy.sleep(1)
         self.cs.switch_controller('moveit')
