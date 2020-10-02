@@ -17,6 +17,9 @@ from dougsm_helpers.timeit import TimeIt
 from ggrasp.ggrasp import predict, process_depth_image
 from dougsm_helpers.gridshow import gridshow
 
+from skimage.draw import circle
+from skimage.feature import peak_local_max
+
 from ggrasp.msg import Grasp
 from sensor_msgs.msg import Image, CameraInfo
 
@@ -49,6 +52,7 @@ class GGraspRt:
         self.curr_depth_img = None
         self.curr_img_time = 0
         self.last_image_pose = None
+        self.prev_mp = np.array([224, 224])
         rospy.Subscriber(rospy.get_param('~camera/depth_topic'), Image, self._depth_img_callback, queue_size=1)
 
     def _depth_img_callback(self, msg):
@@ -81,7 +85,12 @@ class GGraspRt:
 
         width_m = width_img / 300.0 * 2.0 * depth_crop * np.tan(self.cam_fov * self.img_crop_size/depth.shape[0] / 2.0 / 180.0 * np.pi)
 
-        best_g = np.argmax(points)
+        maxes = peak_local_max(points, min_distance=10, threshold_abs=0.1, num_peaks=3)
+        if maxes.shape[0] == 0:
+            rospy.logerror("No Local Maxes")
+            return
+        best_g = maxes[np.argmin(np.linalg.norm(maxes - self.prev_mp, axis=1))]
+        self.prev_mp = (best_g * 0.25 + self.prev_mp * 0.75).astype(np.int)
         best_g_unr = np.unravel_index(best_g, points.shape)
 
         g = Grasp()
@@ -92,8 +101,14 @@ class GGraspRt:
         g.width = width_m[best_g_unr]
         g.quality = points[best_g_unr]
 
+        points_annotated = points.copy()
+        rr, cc = circle(self.prev_mp[0], self.prev_mp[1], 5)
+        points_annotated[rr, cc, 0] = 0
+        points_annotated[rr, cc, 1] = 255
+        points_annotated[rr, cc, 2] = 0
+
         show = gridshow('Display',
-                 [depth_crop, points],
+                 [depth_crop, points_annotated],
                  [(0.30, 0.55), None, (-np.pi/2, np.pi/2)],
                  [cv2.COLORMAP_BONE, cv2.COLORMAP_JET, cv2.COLORMAP_BONE],
                  3,
