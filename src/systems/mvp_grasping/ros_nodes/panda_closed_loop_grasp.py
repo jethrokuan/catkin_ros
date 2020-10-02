@@ -40,6 +40,7 @@ class PandaClosedLoopGraspController(object):
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
         self.grasp_sub = rospy.Subscriber("/ggrasp/predict", Grasp, self.grasp_cmd_callback, queue_size=1)
         self.max_velo = 0.10
+        self.min_velo = 0.01    #  Value used to check for convergence
         self.velo_scale = 0.15
 
         self.initial_offset = 0.03
@@ -68,7 +69,6 @@ class PandaClosedLoopGraspController(object):
         q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
         q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
         best_grasp.pose.orientation = q_new
-        best_grasp.pose.position.z += self.initial_offset + self.LINK_EE_OFFSET # Offset from end effector position to
 
         self.best_grasp = best_grasp
 
@@ -117,22 +117,14 @@ class PandaClosedLoopGraspController(object):
         return v
 
     def __execute_grasp(self):
-        while self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z and not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:            
+        while not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:            
             v = self.get_velocity()
-            if not v:
+            if not v or v < self.min_velo:
                 break
             else:
                 self.curr_velo_pub.publish(v)
             rospy.sleep(0.01)
 
-        self.best_grasp.pose.position.z -= self.initial_offset + self.LINK_EE_OFFSET
-
-        v = Twist()
-        v.linear.z = -0.05
-        while self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z and not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:
-            self.curr_velo_pub.publish(v)
-            rospy.sleep(0.01)
-            
         # Check for collisions
         if self.ROBOT_ERROR_DETECTED:
             return False
