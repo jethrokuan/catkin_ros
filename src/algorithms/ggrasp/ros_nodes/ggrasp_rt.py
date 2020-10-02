@@ -104,7 +104,7 @@ class GGraspRt:
 
 
 if __name__ == '__main__':
-    rospy.init_node('ggrasp_rt')
+    rospy.init_node('ggrasp')
     import dougsm_helpers.tf_helpers as tfh
     GGrasp = GGraspRt()
     rospy.spin()
