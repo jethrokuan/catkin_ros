@@ -40,7 +40,7 @@ class PandaClosedLoopGraspController(object):
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
         self.grasp_sub = rospy.Subscriber("/ggrasp/predict", Grasp, self.grasp_cmd_callback, queue_size=1)
         self.max_velo = 0.10
-        self.max_dist_to_target = 0.03    # distance to target to stop updating target pose
+        self.max_dist_to_target = 0.4    # distance to target to stop updating target pose
         self.velo_scale = 0.15
 
         self.initial_offset = 0.03
@@ -139,7 +139,7 @@ class PandaClosedLoopGraspController(object):
 
         while not any(self.robot_state.cartesian_contact) \
               and not self.ROBOT_ERROR_DETECTED \
-              and abs(self.dist_to_target(target_pose) - self.max_dist_to_target) > 0.01:
+              and abs(self.dist_to_target(target_pose)) > 0.06:
             v = self.get_velocity(target_pose)
             self.curr_velo_pub.publish(v)
             rospy.sleep(0.01)
