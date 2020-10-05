@@ -43,8 +43,6 @@ class PandaClosedLoopGraspController(object):
         self.max_dist_to_target = 0.4    # distance to target to stop updating target pose
         self.velo_scale = 0.15
 
-        self.initial_offset = 0.03
-
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
 
@@ -67,7 +65,6 @@ class PandaClosedLoopGraspController(object):
         q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
         q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
         best_grasp.pose.orientation = q_new
-        best_grasp.pose.position.z = best_grasp.pose.position.z - 0.03
 
         self.best_grasp = best_grasp
 
@@ -123,7 +120,8 @@ class PandaClosedLoopGraspController(object):
 
     def __execute_grasp(self):
         target_pose = None
-        while not any(self.robot_state.cartesian_contact) \
+        while self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z \
+              and not any(self.robot_state.cartesian_contact) \
               and not self.ROBOT_ERROR_DETECTED \
               and self.dist_to_target(target_pose) > self.max_dist_to_target:
             if not self.best_grasp:
@@ -139,7 +137,8 @@ class PandaClosedLoopGraspController(object):
 
         while not any(self.robot_state.cartesian_contact) \
               and not self.ROBOT_ERROR_DETECTED \
-              and abs(self.dist_to_target(target_pose)) > 0.06:
+              and self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z:
+            # We keep going until the height is right, rather than distance.
             v = self.get_velocity(target_pose)
             self.curr_velo_pub.publish(v)
             rospy.sleep(0.01)
