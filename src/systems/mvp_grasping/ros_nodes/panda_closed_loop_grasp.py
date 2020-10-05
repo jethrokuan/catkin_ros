@@ -44,8 +44,6 @@ class PandaClosedLoopGraspController(object):
         self.velo_scale = 0.15
 
         self.initial_offset = 0.03
-        self.gripper_width_offset = 0.03
-        self.LINK_EE_OFFSET = 0.1384
 
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
@@ -69,6 +67,7 @@ class PandaClosedLoopGraspController(object):
         q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
         q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
         best_grasp.pose.orientation = q_new
+        best_grasp.pose.position.z = best_grasp.pose.position.z - 0.03
 
         self.best_grasp = best_grasp
 
