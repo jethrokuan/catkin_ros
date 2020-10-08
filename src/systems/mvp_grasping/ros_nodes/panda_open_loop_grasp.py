@@ -22,7 +22,6 @@ import dougsm_helpers.tf_helpers as tfh
 from dougsm_helpers.ros_control import ControlSwitcher
 
 from ggrasp.msg import Grasp
-from ggrasp.srv import GraspPrediction
 
 from mvp_grasping.panda_base_grasping_controller import Logger, Run, Experiment
 
@@ -35,9 +34,6 @@ class PandaOpenLoopGraspController(object):
     Perform open-loop grasps from a single viewpoint using the Panda robot.
     """
     def __init__(self):
-        ggrasp_service_name = '/ggrasp'
-        rospy.wait_for_service(ggrasp_service_name + '/predict')
-        self.ggrasp_srv = rospy.ServiceProxy(ggrasp_service_name + '/predict', GraspPrediction)
         self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
 
         self.curr_velocity_publish_rate = 100.0  # Hz
@@ -60,6 +56,8 @@ class PandaOpenLoopGraspController(object):
     def __recover_robot_from_error(self):
         rospy.logerr('Recovering')
         self.pc.recover()
+        self.cs.switch_controller('moveit')
+        self.pc.goto_pose(self.initial_pose, velocity=0.1)
         rospy.logerr('Done')
         self.ROBOT_ERROR_DETECTED = False
 
@@ -79,10 +77,8 @@ class PandaOpenLoopGraspController(object):
     def __execute_best_grasp(self):
             self.cs.switch_controller('moveit')
 
-            ret = self.ggrasp_srv.call()
-            if not ret.success:
-                return False
-            best_grasp = ret.best_grasp
+            best_grasp = rospy.wait_for_message("/ggrasp/predict", Grasp)
+            print(best_grasp)
             self.best_grasp = best_grasp
 
             tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
