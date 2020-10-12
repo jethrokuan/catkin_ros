@@ -17,6 +17,7 @@ from franka_msgs.msg import FrankaState, Errors as FrankaErrors
 import tf.transformations as tft
 
 from franka_control_wrappers.panda_commander import PandaCommander
+from geometry_msgs.msg import PoseStamped
 
 import dougsm_helpers.tf_helpers as tfh
 from dougsm_helpers.ros_control import ControlSwitcher
@@ -52,6 +53,14 @@ class PandaOpenLoopGraspController(object):
         self.ROBOT_ERROR_DETECTED = False
         self.BAD_UPDATE = False
         rospy.Subscriber('/franka_state_controller/franka_states', FrankaState, self.__robot_state_callback, queue_size=1)
+
+    def _setup_scene():
+        rospy.sleep(2.0)
+        p = PoseStamped()
+        p.pose.position.x = 0.
+        p.pose.position.y = 0.
+        p.pose.position.z = 0.
+        self.pc.add_box("table", p, (0.5, 1.5, 0.6))
 
     def __recover_robot_from_error(self):
         rospy.logerr('Recovering')
@@ -123,6 +132,7 @@ class PandaOpenLoopGraspController(object):
             rospy.sleep(0.2)
             self.pc.grasp(0, force=1)
             self.clear_octomap_srv.call() # We need to clear the octomap so moveit does not complain of collisions
+            self._setup_scene()           # We manually add back the table
             self.pc.goto_pose(self.initial_pose, velocity=0.1)
             
             # Sometimes triggered by closing on something that pushes the robot
