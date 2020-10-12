@@ -23,10 +23,6 @@ class PandaCommander(object):
 
         self.reset_publisher = rospy.Publisher('/franka_control/error_recovery/goal', ErrorRecoveryActionGoal, queue_size=1)
 
-    def add_box(self, object_name, p, dimension):
-        p.header.frame_id = self.robot.get_planning_frame()
-        self.scene.add_box(object_name, p, dimensions)
-
     def print_debug_info(self):
         if self.active_group:
             planning_frame = self.active_group.get_planning_frame()
