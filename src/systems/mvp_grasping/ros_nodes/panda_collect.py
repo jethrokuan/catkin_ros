@@ -45,7 +45,7 @@ class PandaCollectController(object):
         self.ggrasp_srv = rospy.ServiceProxy(ggrasp_service_name + '/predict', GraspPrediction)
         self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
 
-        self.save_dir = "~/saves/"
+        self.save_dir = "./ggrasp_data/"
         self.depth_img = None
         self.grasp = None
         self.curr_velocity_publish_rate = 100.0  # Hz
