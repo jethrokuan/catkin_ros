@@ -114,7 +114,7 @@ class GGraspService:
             g.pose.orientation = tfh.list_to_quaternion(tft.quaternion_from_euler(np.pi, 0, ((angle[best_g_unr]%np.pi) - np.pi/2)))
             g.width = width_m[best_g_unr]
             g.quality = points[best_g_unr]
-            ret.depth = depth
+            ret.depth = bridge.cv2_to_imgmsg(depth)
             ret.grasp = [g_img.center, g_img.angle, g_img.quality, g_img.length, g_img.width]
 
             show = gridshow('Display',
