@@ -101,7 +101,7 @@ class GGraspService:
 
             width_m = width_img / 300.0 * 2.0 * depth_crop * np.tan(self.cam_fov * self.img_crop_size/depth.shape[0] / 2.0 / 180.0 * np.pi)
 
-            local_max = peak_local_max(points, min_distance=10, threshold_abs=0.02, num_peaks=1)[0]
+            best_g_unr = peak_local_max(points, min_distance=10, threshold_abs=0.02, num_peaks=1)[0]
             best_g = np.ravel_multi_index(((best_g_unr[0]), (best_g_unr[1])), points.shape)
             best_g_unr = np.unravel_index(best_g, points.shape)
             
