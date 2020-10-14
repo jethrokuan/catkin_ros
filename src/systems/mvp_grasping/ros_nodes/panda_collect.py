@@ -171,7 +171,7 @@ class PandaCollectController(object):
         if successful == "y":
             UID = uuid.uuid1()
             cv2.imwrite(self.save_dir + str(UID) + ".png", self.depth_img)
-            with open(self.save_dir + str(UID) + ".grasp") as f:
+            with open(self.save_dir + str(UID) + ".grasp", "w") as f:
                 f.write(";".join(self.grasp))
 
 if __name__ == '__main__':
