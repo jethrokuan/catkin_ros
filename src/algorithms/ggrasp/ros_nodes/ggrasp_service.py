@@ -83,7 +83,7 @@ class GGraspService:
             # Do grasp prediction
             depth_crop, depth_nan_mask = process_depth_image(depth, self.img_crop_size, 300, return_mask=True, crop_y_offset=self.img_crop_y_offset)
             points, angle, width_img, _ = predict(depth_crop, self.model, process_depth=False, depth_nan_mask=depth_nan_mask, filters=(2.0, 2.0, 2.0))
-            g_img = detect_grasps(points, angle, width_img=grasp_width_img, no_grasps=1)[0]
+            g_img = detect_grasps(points, angle, width_img=width_img, no_grasps=1)[0]
 
             # Mask Points Here
             angle -= np.arcsin(camera_rot[0, 1])  # Correct for the rotation of the camera
