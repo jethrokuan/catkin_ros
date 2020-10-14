@@ -115,7 +115,7 @@ class GGraspService:
             g.width = width_m[best_g_unr]
             g.quality = points[best_g_unr]
             ret.depth = depth
-            ret.grasp = [g_img.center, g_img.angle, g_img.quality, g_img.length. g_img.width]
+            ret.grasp = [g_img.center, g_img.angle, g_img.quality, g_img.length, g_img.width]
 
             show = gridshow('Display',
                      [depth_crop, points],
