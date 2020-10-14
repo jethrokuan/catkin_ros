@@ -333,8 +333,8 @@ class CustomDataset(GraspDatasetBase):
 
     def plot(self, idx):
         gtbbs = self.get_gtbb(idx)
-        depth_img = self.get_depth_img()
+        depth_img = image.Image.from_file(self.depth_files[idx]).img
         f, ax = plt.subplots()
         ax.imshow(depth_img)
-        for g in gs:
-            g.show(ax)
+        gtbbs.show(ax)
+        return f

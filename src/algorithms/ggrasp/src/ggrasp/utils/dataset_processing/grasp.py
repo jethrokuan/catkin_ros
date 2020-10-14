@@ -113,7 +113,7 @@ class GraspRectangles:
             for l in f:
                 x, y, theta, _, w, h = [float(v) for v in l[:-1].split(';')]
                 # index based on row, column (y,x), and the Jacquard dataset's angles are flipped around an axis.
-                grs.append(Grasp(np.array([y, x]), theta, w, h).as_gr)
+                grs.append(Grasp(np.array([x, y]), theta, w, h).as_gr)
         grs = cls(grs)
         grs.scale(scale)
         return grs
@@ -335,7 +335,7 @@ class GraspRectangle:
             return
         self.points *= factor
 
-    def plot(self, ax, q, color=None):
+    def plot(self, ax, q=1, color=None):
         """
         Plot grasping rectangle.
         :param ax: Existing matplotlib axis
