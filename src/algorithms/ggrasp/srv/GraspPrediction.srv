@@ -2,4 +2,4 @@
 bool success
 ggrasp/Grasp best_grasp
 sensor_msgs/Image depth
-float32 grasp
+float32[] grasp
