@@ -167,7 +167,7 @@ class PandaCollectController(object):
                 self.__recover_robot_from_error()
         self.pc.set_gripper(0.1)
 
-        successful = input("grasp successful? (y/n): ")
+        successful = raw_input("grasp successful? (y/n): ")
         if successful == "y":
             UID = uuid.uuid1()
             cv2.imgwrite(self.save_dir + UID + ".tiff", self.depth_img)
