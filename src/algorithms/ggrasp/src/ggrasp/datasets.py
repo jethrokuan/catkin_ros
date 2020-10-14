@@ -305,7 +305,7 @@ class CustomDataset(GraspDatasetBase):
         """
         super(CustomDataset, self).__init__(**kwargs)
 
-        self.grasp_files = glob.glob(os.path.join(file_path, '*', '*.grasp'))
+        self.grasp_files = glob.glob(os.path.join(file_path, '*.grasp'))
         self.grasp_files.sort()
         self.length = len(self.grasp_files)
 
