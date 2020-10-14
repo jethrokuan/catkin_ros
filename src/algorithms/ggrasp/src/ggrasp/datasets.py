@@ -292,3 +292,39 @@ class JacquardDataset(GraspDatasetBase):
 
     def get_jname(self, idx):
         return '_'.join(self.grasp_files[idx].split(os.sep)[-1].split('_')[:-1])
+
+class CustomDataset(GraspDatasetBase):
+    """
+    Dataset wrapper for the custom collected dataset.
+    """
+
+    def __init__(self, file_path, **kwargs):
+        """
+        :param file_path: Dataset directory.
+        :param kwargs: kwargs for GraspDatasetBase
+        """
+        super(CustomDataset, self).__init__(**kwargs)
+
+        self.grasp_files = glob.glob(os.path.join(file_path, '*', '*.grasp'))
+        self.grasp_files.sort()
+        self.length = len(self.grasp_files)
+
+        if self.length == 0:
+            raise FileNotFoundError('No dataset files found. Check path: {}'.format(file_path))
+
+        self.depth_files = [f.replace('.grasp', '.png') for f in self.grasp_files]
+
+    def get_gtbb(self, idx, rot=0, zoom=1.0):
+        gtbbs = grasp.GraspRectangles.load_from_custom_file(self.grasp_files[idx], scale=1.0)
+        c = self.output_size // 2
+        gtbbs.rotate(rot, (c, c))
+        gtbbs.zoom(zoom, (c, c))
+        return gtbbs
+
+    def get_depth(self, idx, rot=0, zoom=1.0):
+        depth_img = image.Image.from_file(self.depth_files[idx])
+        depth_img.rotate(rot)
+        depth_img.normalise()
+        depth_img.zoom(zoom)
+        depth_img.resize((self.output_size, self.output_size))
+        return depth_img.img

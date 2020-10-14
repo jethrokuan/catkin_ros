@@ -106,6 +106,18 @@ class GraspRectangles:
         grs.scale(scale)
         return grs
 
+    @classmethod
+    def load_from_custom_file(cls, fname, scale=1.0):
+        grs = []
+        with open(fname) as f:
+            for l in f:
+                x, y, theta, w, h = [float(v) for v in l[:-1].split(';')]
+                # index based on row, column (y,x), and the Jacquard dataset's angles are flipped around an axis.
+                grs.append(Grasp(np.array([y, x]), theta, w, h).as_gr)
+        grs = cls(grs)
+        grs.scale(scale)
+        return grs
+
     def append(self, gr):
         """
         Add a grasp rectangle to this GraspRectangles object
