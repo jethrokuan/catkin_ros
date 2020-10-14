@@ -115,7 +115,7 @@ class GGraspService:
             g.width = width_m[best_g_unr]
             g.quality = points[best_g_unr]
             ret.depth = bridge.cv2_to_imgmsg(depth)
-            ret.grasp = [max_pixel[x], max_pixel[y], angle_orig[best_g_unr], g.quality, width_img[best_g_unr], width_img[best_g_unr] / 2]
+            ret.grasp = [max_pixel[0], max_pixel[1], angle_orig[best_g_unr], g.quality, width_img[best_g_unr], width_img[best_g_unr] / 2]
 
             show = gridshow('Display',
                      [depth_crop, points],
