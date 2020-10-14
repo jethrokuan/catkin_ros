@@ -15,6 +15,8 @@ from tf import transformations as tft
 from dougsm_helpers.timeit import TimeIt
 
 from ggrasp.ggrasp import predict, process_depth_image
+from ggrasp.utils.dataset_processing.grasp import detect_grasps
+
 from dougsm_helpers.gridshow import gridshow
 
 from ggrasp.srv import GraspPrediction, GraspPredictionResponse
@@ -81,6 +83,7 @@ class GGraspService:
             # Do grasp prediction
             depth_crop, depth_nan_mask = process_depth_image(depth, self.img_crop_size, 300, return_mask=True, crop_y_offset=self.img_crop_y_offset)
             points, angle, width_img, _ = predict(depth_crop, self.model, process_depth=False, depth_nan_mask=depth_nan_mask, filters=(2.0, 2.0, 2.0))
+            g_img = detect_grasps(points, angle, width_img=grasp_width_img, no_grasps=1)[0]
 
             # Mask Points Here
             angle -= np.arcsin(camera_rot[0, 1])  # Correct for the rotation of the camera
@@ -94,9 +97,10 @@ class GGraspService:
 
             width_m = width_img / 300.0 * 2.0 * depth_crop * np.tan(self.cam_fov * self.img_crop_size/depth.shape[0] / 2.0 / 180.0 * np.pi)
 
-            best_g = np.argmax(points)
+            local_max = peak_local_max(points, min_distance=10, threshold_abs=0.02, num_peaks=1)[0]
+            best_g = np.ravel_multi_index(((best_g_unr[0]), (best_g_unr[1])), points.shape)
             best_g_unr = np.unravel_index(best_g, points.shape)
-
+            
             ret = GraspPredictionResponse()
             ret.success = True
             g = ret.best_grasp
@@ -106,6 +110,8 @@ class GGraspService:
             g.pose.orientation = tfh.list_to_quaternion(tft.quaternion_from_euler(np.pi, 0, ((angle[best_g_unr]%np.pi) - np.pi/2)))
             g.width = width_m[best_g_unr]
             g.quality = points[best_g_unr]
+            ret.depth = depth
+            ret.grasp = [g_img.center, g_img.angle, g_img.quality, g_img.length. g_img.width]
 
             show = gridshow('Display',
                      [depth_crop, points],
