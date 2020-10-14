@@ -6,6 +6,8 @@ import numpy as np
 import torch
 import torch.utils.data
 
+import matplotlib.pyplot as plt
+
 from ggrasp.utils.dataset_processing import grasp, image
 
 class GraspDatasetBase(torch.utils.data.Dataset):
@@ -328,3 +330,11 @@ class CustomDataset(GraspDatasetBase):
         depth_img.zoom(zoom)
         depth_img.resize((self.output_size, self.output_size))
         return depth_img.img
+
+    def plot(self, idx):
+        gtbbs = self.get_gtbb(idx)
+        depth_img = self.get_depth_img()
+        f, ax = plt.subplots()
+        ax.imshow(depth_img)
+        for g in gs:
+            g.show(ax)
