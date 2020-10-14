@@ -95,10 +95,11 @@ class PandaCollectController(object):
                 return False
             
             self.best_grasp = ret.best_grasp
+            best_grasp = self.best_grasp
             self.depth_img = bridge.imgmsg_to_cv2(ret.depth)
             self.grasp = ret.grasp
 
-            tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
+            tfh.publish_pose_as_transform(self.best_grasp.pose, 'panda_link0', 'G', 0.5)
 
             # Rotate quaternion by 45 deg on the z axis to account for home position being -45deg
             q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
