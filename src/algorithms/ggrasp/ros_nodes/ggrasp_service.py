@@ -98,10 +98,12 @@ class GGraspService:
 
             width_m = width_img / 300.0 * 2.0 * depth_crop * np.tan(self.cam_fov * self.img_crop_size/depth.shape[0] / 2.0 / 180.0 * np.pi)
 
-            best_g_unr = peak_local_max(points, min_distance=10, threshold_abs=0.02, num_peaks=1)[0]
-            best_g = np.ravel_multi_index(((best_g_unr[0]), (best_g_unr[1])), points.shape)
-            best_g_unr = np.unravel_index(best_g, points.shape)
-            
+            best_g_unr = tuple(peak_local_max(points, min_distance=10, threshold_abs=0.02, num_peaks=1)[0])
+            best_g = np.ravel_multi_index(best_g_unr, points.shape)
+
+            max_pixel = ((np.array(best_g) / 300 * self.img_crop_size) + np.array([(480 - self.img_crop_size)//2 - self.img_crop_y_offset, (640 - self.img_crop_size) // 2]))
+            max_pixel = np.round(max_pixel)
+           
             ret = GraspPredictionResponse()
             ret.success = True
             g = ret.best_grasp
@@ -112,7 +114,7 @@ class GGraspService:
             g.width = width_m[best_g_unr]
             g.quality = points[best_g_unr]
             ret.depth = bridge.cv2_to_imgmsg(depth)
-            ret.grasp = [g.pose.position.x, g.pose.position.y, angle_orig[best_g_unr], g.quality, g.width, g.width / 2]
+            ret.grasp = [max_pixel[x], max_pixel[y], angle_orig[best_g_unr], g.quality, width_img[best_g_unr], width_img[best_g_unr] / 2]
 
             show = gridshow('Display',
                      [depth_crop, points],
