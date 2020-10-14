@@ -41,8 +41,8 @@ class PandaCollectController(object):
     """
     def __init__(self):
         ggrasp_service_name = '/ggrasp'
-        rospy.wait_for_service(ggcnn_service_name + '/predict')
-        self.ggrasp_srv = rospy.ServiceProxy(ggcnn_service_name + '/predict', GraspPrediction)
+        rospy.wait_for_service(ggrasp_service_name + '/predict')
+        self.ggrasp_srv = rospy.ServiceProxy(ggrasp_service_name + '/predict', GraspPrediction)
         self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
 
         self.save_dir = "~/saves/"
