@@ -22,6 +22,8 @@ from dougsm_helpers.gridshow import gridshow
 from ggrasp.srv import GraspPrediction, GraspPredictionResponse
 from sensor_msgs.msg import Image, CameraInfo
 
+from skimage.feature import peak_local_max
+
 import cv_bridge
 bridge = cv_bridge.CvBridge()
 
