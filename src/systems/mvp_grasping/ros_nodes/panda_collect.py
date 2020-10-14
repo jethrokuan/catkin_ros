@@ -26,6 +26,7 @@ import dougsm_helpers.tf_helpers as tfh
 from dougsm_helpers.ros_control import ControlSwitcher
 
 from ggrasp.msg import Grasp
+from ggrasp.srv import GraspPrediction
 
 from mvp_grasping.panda_base_grasping_controller import Logger, Run, Experiment
 
@@ -52,7 +53,7 @@ class PandaCollectController(object):
         self.max_velo = 0.10
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
-n
+
         self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
                                    'velocity': 'cartesian_velocity_node_controller'})
         self.cs.switch_controller('moveit')
