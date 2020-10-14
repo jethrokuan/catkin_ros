@@ -170,8 +170,8 @@ class PandaCollectController(object):
         successful = raw_input("grasp successful? (y/n): ")
         if successful == "y":
             UID = uuid.uuid1()
-            cv2.imwrite(self.save_dir + UID + ".tiff", self.depth_img)
-            with open(self.save_dir + UID + ".grasp") as f:
+            cv2.imwrite(self.save_dir + str(UID) + ".tiff", self.depth_img)
+            with open(self.save_dir + str(UID) + ".grasp") as f:
                 f.write(";".join(self.grasp))
 
 if __name__ == '__main__':
