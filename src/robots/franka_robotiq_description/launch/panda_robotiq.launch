@@ -1,16 +1,13 @@
 <?xml version="1.0" ?>
 <launch>
 
-  <arg name="robot_ip" />         <!-- ip of your Panda robot -->
-  <arg name="gripper_dev_name"/>  <!-- e.g. /dev/ttyUSB1 -->
+  <arg name="robot_ip" default="172.16.0.3" />
 
   <group ns="robotiq_gripper">
 
     <!-- start the gripper hardware node -->
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
-    <include file="$(find robotiq_2f_gripper_control)/launch/robotiq_action_server.launch">
-        <arg name="comport" value="$(arg gripper_dev_name)"/>
-    </include>
+    <include file="$(find robotiq_2f_gripper_action_server)/launch/robotiq_2f_gripper_action_server.launch"></include>>
 
     <!-- start nodes to help visualize the gripper later in RViz -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
@@ -37,8 +34,6 @@
     <include file="$(find panda_moveit_config)/launch/move_group.launch">
       <arg name="load_gripper" value="false" />
     </include>
-
-    <!-- start the example script to execute a pick-and-place-sequence -->
   </group>
 
   <!-- start RViz for visualizing the robot -->
