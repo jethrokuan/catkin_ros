@@ -10,7 +10,6 @@ find_package(catkin REQUIRED
   geometry_msgs
   panda_moveit_config
   robotiq_2f_gripper_control
-  robotiq_2f_gripper_msgs
   rosparam
   rospy
 )
@@ -23,7 +22,6 @@ catkin_package(CATKIN_DEPENDS
   geometry_msgs
   panda_moveit_config
   robotiq_2f_gripper_control
-  robotiq_2f_gripper_msgs
   rosparam
   rospy)
 
