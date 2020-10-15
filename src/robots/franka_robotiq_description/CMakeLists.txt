@@ -1,12 +1,32 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_robotiq_description)
 
-find_package(catkin REQUIRED)
-catkin_package(CATKIN_DEPENDS xacro robotiq_2f_140_gripper_visualization)
-
-install(DIRECTORY meshes
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+find_package(catkin REQUIRED
+  actionlib_msgs
+  actionlib
+  controller_manager_msgs
+  franka_control
+  franka_description
+  geometry_msgs
+  panda_moveit_config
+  robotiq_2f_gripper_control
+  robotiq_2f_gripper_msgs
+  rosparam
+  rospy
 )
-install(DIRECTORY robots
+catkin_package(CATKIN_DEPENDS
+  actionlib_msgs
+  actionlib
+  controller_manager_msgs
+  franka_control
+  franka_description
+  geometry_msgs
+  panda_moveit_config
+  robotiq_2f_gripper_control
+  robotiq_2f_gripper_msgs
+  rosparam
+  rospy)
+
+install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

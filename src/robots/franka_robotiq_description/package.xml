@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>franka_description</name>
+  <name>franka_robotiq_description</name>
   <version>0.1.0</version>
   <description>franka_robotiq_description contains URDF files and meshes of
   Franka Emika, with the robotiq arm</description>
