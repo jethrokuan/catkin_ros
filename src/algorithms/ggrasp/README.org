@@ -23,3 +23,15 @@ predicts a suitable antipodal grasp configuration for the objects in the image.
 * Obtaining the Training Data
 
 GG-CNN can be trained on the Cornell Grasping dataset, and the Jacquard dataset.
+
+* Training the Models
+
+To train the models, we use guild.ai. First, navigate to the ~src~ folder (which contains the guild.yml).
+
+Then, you see a list of operations. For example, to train the ggcnn2 model:
+
+#+BEGIN_SRC bash
+guild run ggcnn2:train loss:smooth_l1_loss smoothness_weight:0.5 dataset:JacquardDataset dataset-path:/path/to/dataset
+#+END_SRC
+
+Sample trained models can be found in the ~saved_models~ folder.
