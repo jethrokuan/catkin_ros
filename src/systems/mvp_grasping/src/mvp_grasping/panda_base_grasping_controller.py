@@ -259,7 +259,7 @@ class BaseGraspController(object):
             self.best_grasp.pose.position.z = max(self.best_grasp.pose.position.z - 0.01, 0.026)  # 0.021 = collision with ground
             self.best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end efector position to
 
-            self.pc.set_gripper(self.best_grasp.width, wait=False)
+            self.pc.gripper.set_gripper(self.best_grasp.width, wait=False)
             rospy.sleep(0.1)
             self.pc.goto_pose(self.best_grasp.pose, velocity=0.5)
 
@@ -283,7 +283,7 @@ class BaseGraspController(object):
 
             # close the fingers.
             rospy.sleep(0.2)
-            self.pc.grasp(0, force=2)
+            self.pc.gripper.grasp(0, force=2)
 
             # Sometimes triggered by closing on something that pushes the robot
             if self.ROBOT_ERROR_DETECTED:
@@ -305,7 +305,7 @@ class BaseGraspController(object):
             start_pose[0] += np.random.randn() * 0.05
             start_pose[1] += np.random.randn() * 0.05
             self.pc.goto_pose(start_pose, velocity=0.25)
-            self.pc.set_gripper(0.1)
+            self.pc.gripper.set_gripper(0.1)
 
             self.cs.switch_controller('velocity')
 
@@ -343,7 +343,7 @@ class BaseGraspController(object):
             self.cs.switch_controller('moveit')
             self.pc.goto_named_pose('grip_ready', velocity=0.5)
             self.pc.goto_named_pose('drop_box', velocity=0.5)
-            self.pc.set_gripper(0.1)
+            self.pc.gripper.set_gripper(0.1)
 
             # Check success using the scales.
             rospy.sleep(1.0)

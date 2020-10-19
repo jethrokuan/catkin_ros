@@ -131,7 +131,7 @@ class PandaClosedLoopGraspController(object):
             target_pose = self.best_grasp.pose
             v = self.get_velocity(target_pose)
             self.curr_velo_pub.publish(v)
-            self.pc.set_gripper(self.best_grasp.width)
+            self.pc.gripper.set_gripper(self.best_grasp.width)
             rospy.sleep(0.01)
 
         # Check for collisions
@@ -150,7 +150,7 @@ class PandaClosedLoopGraspController(object):
         self.cs.switch_controller('moveit')
         # close the fingers.
         rospy.sleep(0.2)
-        self.pc.grasp(0, force=1)
+        self.pc.gripper.grasp(0, force=1)
         self.clear_octomap_srv.call() # We need to clear the octomap so moveit does not complain of collisions
         self.pc.goto_pose(self.initial_pose, velocity=0.1)
 
@@ -168,14 +168,14 @@ class PandaClosedLoopGraspController(object):
     def go(self):
         self.cs.switch_controller('moveit')
         self.initial_pose = self.pc.get_current_pose()
-        self.pc.set_gripper(0.1)
+        self.pc.gripper.set_gripper(0.1)
         self.cs.switch_controller('velocity')
         grasp_ret = self.__execute_grasp()
         if not grasp_ret or self.ROBOT_ERROR_DETECTED:
             rospy.logerr('Something went wrong, aborting this run')
             if self.ROBOT_ERROR_DETECTED:
                 self.__recover_robot_from_error()
-        self.pc.set_gripper(0.1)
+        self.pc.gripper.set_gripper(0.1)
 
 if __name__ == '__main__':
     rospy.init_node('panda_closed_loop_grasp')
