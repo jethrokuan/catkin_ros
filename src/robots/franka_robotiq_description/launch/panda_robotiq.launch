@@ -3,8 +3,6 @@
 
   <arg name="robot_ip" default="172.16.0.3" />
 
-  <group ns="robotiq_gripper">
-
     <!-- start the gripper hardware node -->
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
     <include file="$(find robotiq_2f_gripper_action_server)/launch/robotiq_2f_gripper_action_server.launch"></include>>
@@ -18,10 +16,6 @@
         <rosparam param="use_gui">false</rosparam>
     </node>
 
-  </group>
-
-  <group ns="panda">
-
     <node pkg="tf" type="static_transform_publisher" name="map_frame_static_publisher" args="0 0 0 0 0 0 world panda_link0 100" />
 
     <!-- start the hardware node for the Panda robot -->
@@ -34,8 +28,7 @@
     <include file="$(find panda_moveit_config)/launch/move_group.launch">
       <arg name="load_gripper" value="false" />
     </include>
-  </group>
-
+  
   <!-- start RViz for visualizing the robot -->
   <node pkg="rviz" type="rviz" output="screen" name="rviz" args=""/>
 </launch>
