@@ -8,7 +8,7 @@ class PandaGripper(BaseGripper):
         client.send_goal(franka_gripper.msg.HomingGoal())
         return client.wait_for_result()
 
-    def set_gripper(self, width, speed=0.1, wait=True):
+    def set_gripper(self, width, speed=0.1, effort=40, wait=True):
         client = actionlib.SimpleActionClient('franka_gripper/move', franka_gripper.msg.MoveAction)
         client.wait_for_server()
         client.send_goal(franka_gripper.msg.MoveGoal(width, speed))

@@ -6,7 +6,7 @@ class BaseGripper(object):
         """
         raise NotImplementedError
 
-    def set_gripper(self, width, speed=0.1, wait=True):
+    def set_gripper(self, width, speed=0.1, effort=40, wait=True):
         """
         Set gripper with.
         :param width: Width in metres
