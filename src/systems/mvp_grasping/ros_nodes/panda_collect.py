@@ -40,6 +40,7 @@ class PandaCollectController(object):
     Collect datapoints based on whether grasps are successful.
     """
     def __init__(self):
+        gripper = rospy.get_param("~gripper", "panda")
         ggrasp_service_name = '/ggrasp'
         rospy.wait_for_service(ggrasp_service_name + '/predict')
         self.ggrasp_srv = rospy.ServiceProxy(ggrasp_service_name + '/predict', GraspPrediction)
@@ -57,7 +58,7 @@ class PandaCollectController(object):
         self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
                                    'velocity': 'cartesian_velocity_node_controller'})
         self.cs.switch_controller('moveit')
-        self.pc = PandaCommander(group_name='panda_arm')
+        self.pc = PandaCommander(group_name='panda_arm', gripper=gripper)
 
         self.initial_pose = None
         self.robot_state = None

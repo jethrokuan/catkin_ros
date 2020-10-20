@@ -33,6 +33,7 @@ class PandaClosedLoopGraspController(object):
     Perform closed-loop grasps from a single viewpoint using the Panda robot.
     """
     def __init__(self):
+        gripper = rospy.get_param("~gripper", "panda")
         self.initial_pose = None
         self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
 
@@ -49,7 +50,7 @@ class PandaClosedLoopGraspController(object):
         self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
                                    'velocity': 'cartesian_velocity_node_controller'})
         self.cs.switch_controller('velocity')
-        self.pc = PandaCommander(group_name='panda_arm')
+        self.pc = PandaCommander(group_name='panda_arm', gripper=gripper)
 
         self.robot_state = None
         self.ROBOT_ERROR_DETECTED = False
