@@ -19,7 +19,7 @@
   </group>
   
   <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
-    <arg name="load_gripper" value="$(arg load_gripper)" />
+    <arg name="load_gripper" value="$(eval arg('gripper') == 'panda')" />
   </include>
 
   <group ns="robotiq" if="$(eval arg('gripper') == 'robotiq')">
