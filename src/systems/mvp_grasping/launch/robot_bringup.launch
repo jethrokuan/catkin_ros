@@ -2,39 +2,39 @@
 <!DOCTYPE launch>
 <launch>
   <arg name="robot_ip" default="172.16.0.3" />
-  <arg name="gripper" default="panda">
+  <arg name="gripper" default="panda" />
 
-    <!-- Set some project specific defaults for the panda arm. -->
-    <node name="set_robot_defaults" pkg="franka_control_wrappers" type="set_panda_defaults.py"  respawn="false" output="screen">
-      <param name="gripper" type="str" value="$(arg gripper)"/>
-    </node>
+  <!-- Set some project specific defaults for the panda arm. -->
+  <node name="set_robot_defaults" pkg="franka_control_wrappers" type="set_panda_defaults.py"  respawn="false" output="screen">
+    <param name="gripper" type="str" value="$(arg gripper)"/>
+  </node>
 
-    <node pkg="tf2_ros" type="static_transform_publisher" name="virtual_joint_broadcaster_1" args="0 0 0 0 0 0 world panda_link0" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="virtual_joint_broadcaster_1" args="0 0 0 0 0 0 world panda_link0" />
 
-    <group ns="panda">
-      <include file="$(find franka_control)/launch/franka_control.launch" >
-        <arg name="robot_ip" value="$(arg robot_ip)" />
-        <arg name="load_gripper" default="$(eval arg('gripper') == 'panda')" />
-      </include>
-    </group>
-    
+  <group ns="panda">
+    <include file="$(find franka_control)/launch/franka_control.launch" >
+      <arg name="robot_ip" value="$(arg robot_ip)" />
+      <arg name="load_gripper" default="$(eval arg('gripper') == 'panda')" />
+    </include>
+  </group>
+  
   <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
     <arg name="load_gripper" value="$(arg load_gripper)" />
   </include>
 
   <group ns="robotiq" if="$(eval arg('gripper') == 'robotiq')">
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
-      <include file="$(find   robotiq_2f_gripper_action_server)/launch/robotiq_2f_gripper_action_server.launch"></include>
+    <include file="$(find   robotiq_2f_gripper_action_server)/launch/robotiq_2f_gripper_action_server.launch"></include>
 
-      <!-- start nodes to help visualize the gripper later in RViz -->
-      <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
-        <param name="publish_frequency" type="double" value="100.0"/>
-      </node>
-      <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-        <rosparam param="source_list">[/joint_states]</rosparam>
-        <rosparam param="use_gui">false</rosparam>
-      </node>
-    </group>
+    <!-- start nodes to help visualize the gripper later in RViz -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+      <param name="publish_frequency" type="double" value="100.0"/>
+    </node>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <rosparam param="source_list">[/joint_states]</rosparam>
+      <rosparam param="use_gui">false</rosparam>
+    </node>
+  </group>
 
   <include file="$(find franka_control_wrappers)/launch/cartesian_velocity_controller.launch">
     <arg name="stopped" value="true" />
