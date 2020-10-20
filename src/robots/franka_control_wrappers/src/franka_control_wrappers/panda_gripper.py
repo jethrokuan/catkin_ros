@@ -1,5 +1,6 @@
 from franka_control_wrappers.gripper import BaseGripper
 import franka_gripper.msg
+import actionlib
 
 class PandaGripper(BaseGripper):
     def home_gripper(self):
