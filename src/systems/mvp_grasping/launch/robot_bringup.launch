@@ -21,8 +21,29 @@
   </include>
 
   <group ns="robotiq" if="$(eval arg('gripper') == 'robotiq')">
+    <arg name="gripper_name" default="robotiq" />
+    <arg name="min_gap" default="-0.017" />
+    <arg name="max_gap" default="0.085" />
+    <arg name="min_effort" default="30.0" />
+    <arg name="max_effort" default="100.0" />
+
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
-    <include file="$(find   robotiq_2f_gripper_action_server)/launch/robotiq_2f_gripper_action_server.launch"></include>
+    <node name="robotiq_2f_gripper_rtu" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode">
+      <remap from="Robotiq2FGripperRobotInput" to="input"/>
+      <remap from="Robotiq2FGripperRobotOutput" to="output"/>
+    </node>
+
+    <node name="robotiq_2f_gripper_action_server" pkg="robotiq_2f_gripper_action_server"
+    type="robotiq_2f_gripper_action_server_node">
+      <param name="gripper_name" type="str" value="$(arg gripper_name)" />
+      <param name="min_gap" type="double" value="$(arg min_gap)" />
+      <param name="max_gap" type="double" value="$(arg max_gap)" />
+      <param name="min_effort" type="double" value="$(arg min_effort)" />
+      <param name="max_effort" type="double" value="$(arg max_effort)" />
+
+      <remap from="input" to="input" />
+      <remap from="output" to="output" />
+    </node>
 
     <!-- start nodes to help visualize the gripper later in RViz -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
