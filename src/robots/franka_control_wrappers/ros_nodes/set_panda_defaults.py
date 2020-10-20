@@ -32,6 +32,9 @@ if gripper == "panda":
 elif gripper == "robotiq":
     # 245mm down for the gripper
     gripper_offset = 0.245
+else:
+    raise ValueError("Invalid gripper type")
+
 eef_msg.F_T_EE = [0.707099974155426, -0.707099974155426, 0.0, 0.0, 0.707099974155426, 0.707099974155426, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,  gripper_offset + 0.10339999943971634, 1.0]
 
 res = eef_srv.call(eef_msg).success
