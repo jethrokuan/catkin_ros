@@ -2,8 +2,6 @@
 <!DOCTYPE launch>
 <launch>
   <arg name="robot_ip" default="172.16.0.3" />
-  <arg name="launch_rviz" default="true" />
-  <arg name="load_gripper" default="true" />
   <arg name="gripper" default="panda">
 
     <!-- Set some project specific defaults for the panda arm. -->
@@ -11,13 +9,42 @@
       <param name="gripper" type="str" value="$(arg gripper)"/>
     </node>
 
-  <include file="$(find panda_moveit_config)/launch/panda_control_moveit_rviz.launch">
-    <arg name="robot_ip" default="$(arg robot_ip)" />
-    <arg name="launch_rviz" default="$(arg launch_rviz)" />
-    <arg name="load_gripper" default="$(arg load_gripper)" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="virtual_joint_broadcaster_1" args="0 0 0 0 0 0 world panda_link0" />
+
+    <group ns="panda">
+      <include file="$(find franka_control)/launch/franka_control.launch" >
+        <arg name="robot_ip" value="$(arg robot_ip)" />
+        <arg name="load_gripper" default="$(eval arg('gripper') == 'panda')" />
+      </include>
+    </group>
+    
+  <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
+    <arg name="load_gripper" value="$(arg load_gripper)" />
   </include>
+
+  <group ns="robotiq" if="$(eval arg('gripper') == 'robotiq')">
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
+      <include file="$(find   robotiq_2f_gripper_action_server)/launch/robotiq_2f_gripper_action_server.launch"></include>
+
+      <!-- start nodes to help visualize the gripper later in RViz -->
+      <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="100.0"/>
+      </node>
+      <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <rosparam param="source_list">[/joint_states]</rosparam>
+        <rosparam param="use_gui">false</rosparam>
+      </node>
+    </group>
 
   <include file="$(find franka_control_wrappers)/launch/cartesian_velocity_controller.launch">
     <arg name="stopped" value="true" />
   </include>
+
+  <arg if="$(eval arg('gripper') == 'robotiq')" name="rviz_command_args" value="-d $(find mvp_grasping)/launch/panda_robotiq.rviz" />
+
+  <arg if="$(eval arg('gripper') == 'panda')" name="rviz_command_args" value="-d $(find mvp_grasping)/launch/panda.rviz" />
+
+  <node pkg="rviz" type="rviz" output="screen" name="rviz" args="$(arg rviz_command_args)">
+    <rosparam command="load" file="$(find panda_moveit_config)/config/kinematics.yaml"/>
+  </node>
 </launch>
