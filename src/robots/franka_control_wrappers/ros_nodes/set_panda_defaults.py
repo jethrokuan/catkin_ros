@@ -21,12 +21,17 @@ if not res:
 else:
     rospy.loginfo('Successfully set Force/Torque Collision Behaviour Thresholds')
 
+gripper = rospy.get_param('~gripper')
 
 rospy.wait_for_service('/franka_control/set_EE_frame')
 eef_srv = rospy.ServiceProxy('/franka_control/set_EE_frame', SetEEFrame)
 eef_msg = SetEEFrameRequest()
-# This is the default settings + 35mm down for the gripper
-gripper_offset = 0.035
+if gripper == "panda":
+    # 35mm down for the gripper
+    gripper_offset = 0.035
+elif gripper == "robotiq":
+    # 245mm down for the gripper
+    gripper_offset = 0.245
 eef_msg.F_T_EE = [0.707099974155426, -0.707099974155426, 0.0, 0.0, 0.707099974155426, 0.707099974155426, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,  gripper_offset + 0.10339999943971634, 1.0]
 
 res = eef_srv.call(eef_msg).success
