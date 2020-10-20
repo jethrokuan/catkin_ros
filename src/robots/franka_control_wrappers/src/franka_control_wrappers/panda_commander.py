@@ -25,9 +25,9 @@ class PandaCommander(object):
 
         self.reset_publisher = rospy.Publisher('/franka_control/error_recovery/goal', ErrorRecoveryActionGoal, queue_size=1)
 
-        if self.gripper == "panda":
+        if gripper == "panda":
             self.gripper = PandaGripper()
-        elif self.gripper == "robotiq":
+        elif gripper == "robotiq":
             self.gripper = RobotiqGripper()
             
 
