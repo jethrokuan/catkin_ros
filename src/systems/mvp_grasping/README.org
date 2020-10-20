@@ -44,6 +44,32 @@ rosrun mvp_grasping panda_closed_loop_grasp.py  # Run closed-loop scenario
    robot uses velocity control, with velocity vector $\lambda \times
    (T_{target} - T_{current})$.
 
+* Running with the Robotiq gripper
+
+Replace the commands:
+
+#+BEGIN_SRC bash
+roslaunch mvp_grasping robot_bringup.launch
+#+END_SRC
+
+with:
+
+#+BEGIN_SRC bash
+roslaunch mvp_grasping robot_bringup.launch gripper:=robotiq
+#+END_SRC
+
+and the ~rosrun~ commands e.g.:
+
+#+BEGIN_SRC bash
+rosrun mvp_grasping panda_closed_loop_grasp.py
+#+END_SRC
+
+with:
+
+#+BEGIN_SRC bash
+rosrun mvp_grasping panda_closed_loop_grasp.py _gripper:=robotiq
+#+END_SRC
+
 ** Data Collection
 
 #+BEGIN_SRC bash
