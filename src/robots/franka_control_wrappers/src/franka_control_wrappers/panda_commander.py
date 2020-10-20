@@ -5,8 +5,8 @@ import moveit_commander
 from moveit_commander.conversions import list_to_pose
 
 import franka_gripper.msg
-from franka_control_wrapper.panda_gripper import PandaGripper
-from franka_control_wrapper.robotiq_gripper import RobotiqGripper
+from franka_control_wrappers.panda_gripper import PandaGripper
+from franka_control_wrappers.robotiq_gripper import RobotiqGripper
 from franka_control.msg import ErrorRecoveryActionGoal
 
 
