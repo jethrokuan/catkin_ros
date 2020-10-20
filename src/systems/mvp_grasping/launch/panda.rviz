@@ -123,7 +123,7 @@ Visualization Manager:
       Name: Trajectory
       Robot Alpha: 0.5
       Robot Color: 150; 50; 150
-      Robot Description: panda/robot_description
+      Robot Description: robot_description
       Show Robot Collision: false
       Show Robot Visual: true
       Show Trail: false
@@ -136,7 +136,7 @@ Visualization Manager:
       Move Group Namespace: ""
       Name: PlanningScene
       Planning Scene Topic: /move_group/monitored_planning_scene
-      Robot Description: panda/robot_description
+      Robot Description: robot_description
       Scene Geometry:
         Scene Alpha: 0.899999976
         Scene Color: 50; 230; 50
