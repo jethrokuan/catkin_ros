@@ -28,13 +28,12 @@
     <arg name="min_effort" default="30.0" />
     <arg name="max_effort" default="100.0" />
 
-    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
-    <node name="robotiq_2f_gripper_rtu" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg comport)">
+    <node name="robotiq/robotiq_2f_gripper_rtu" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg comport)">
       <remap from="Robotiq2FGripperRobotInput" to="$(arg gripper_name)/input"/>
       <remap from="Robotiq2FGripperRobotOutput" to="$(arg gripper_name)/output"/>
     </node>
 
-    <node name="robotiq_2f_gripper_action_server" pkg="robotiq_2f_gripper_action_server"
+    <node name="robotiq/robotiq_2f_gripper_action_server" pkg="robotiq_2f_gripper_action_server"
     type="robotiq_2f_gripper_action_server_node">
       <param name="gripper_name" type="str" value="$(arg gripper_name)" />
       <param name="min_gap" type="double" value="$(arg min_gap)" />
@@ -45,6 +44,7 @@
 
     <!-- start nodes to help visualize the gripper later in RViz -->
     <group ns="$(arg gripper_name)">
+      <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
       <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
         <param name="publish_frequency" type="double" value="100.0"/>
       </node>
