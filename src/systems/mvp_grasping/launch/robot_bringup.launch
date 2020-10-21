@@ -19,7 +19,7 @@
     <arg name="max_effort" default="100.0" />
 
     <node name="robotiq_2f_gripper_rtu" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg comport)">
-      <!-- The action server for Robotiq -->
+      <!-- The action server for Robotiq requires input/output to be at /input and /output -->
       <remap from="Robotiq2FGripperRobotInput" to="input"/>
       <remap from="Robotiq2FGripperRobotOutput" to="output"/>
     </node>
