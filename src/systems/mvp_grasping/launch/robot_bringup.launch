@@ -28,12 +28,12 @@
     <arg name="min_effort" default="30.0" />
     <arg name="max_effort" default="100.0" />
 
-    <node name="robotiq/robotiq_2f_gripper_rtu" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg comport)">
+    <node name="robotiq_2f_gripper_rtu" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg comport)">
       <remap from="Robotiq2FGripperRobotInput" to="$(arg gripper_name)/input"/>
       <remap from="Robotiq2FGripperRobotOutput" to="$(arg gripper_name)/output"/>
     </node>
 
-    <node name="robotiq/robotiq_2f_gripper_action_server" pkg="robotiq_2f_gripper_action_server"
+    <node name="robotiq_2f_gripper_action_server" pkg="robotiq_2f_gripper_action_server"
     type="robotiq_2f_gripper_action_server_node">
       <param name="gripper_name" type="str" value="$(arg gripper_name)" />
       <param name="min_gap" type="double" value="$(arg min_gap)" />
