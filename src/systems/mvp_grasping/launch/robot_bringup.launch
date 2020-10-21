@@ -11,7 +11,6 @@
   </node>
 
   <group if="$(eval arg('gripper') == 'robotiq')">
-    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find   franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
     <arg name="gripper_name" default="robotiq" />
     <arg name="min_gap" default="-0.017" />
     <arg name="max_gap" default="0.135" />
@@ -35,6 +34,7 @@
 
     <!-- start nodes to help visualize the gripper later in RViz -->
     <group ns="$(arg gripper_name)">
+      <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
       <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
         <param name="publish_frequency" type="double" value="100.0"/>
       </node>
