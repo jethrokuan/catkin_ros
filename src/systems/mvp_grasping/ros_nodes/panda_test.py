@@ -78,17 +78,16 @@ class PandaOpenLoopGraspController(object):
         self.curr_velo_pub.publish(self.curr_velo)
 
     def go(self):
+        self.initial_pose = self.pc.get_current_pose()
         self.cs.switch_controller('moveit')
-        print(self.initial_pose)
-        self.pc.goto_pose()
-        new_pose = self.initial_pose
+        new_pose = self.pc.get_current_pose()
         new_pose.position.z += 0.05
         self.pc.goto_pose(new_pose, velocity=0.1)
         rospy.sleep(2)
         self.pc.goto_pose(initial_pose, velocity=0.1)
-        self.pc.gripper.set_gripper(0.1)
+        self.pc.gripper.set_gripper(-0.01)
         rospy.sleep(2)
-        self.pc.gripper.set_gripper(1)
+        self.pc.gripper.set_gripper(0.1)
 
 if __name__ == '__main__':
     rospy.init_node('panda_test_grasp')
