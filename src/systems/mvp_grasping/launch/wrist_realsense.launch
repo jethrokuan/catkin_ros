@@ -2,7 +2,7 @@
 <!DOCTYPE launch>
 <launch>
   <arg name="namespace"           default="camera"/>
-  <arg name="filters"             default="disparity,spatial,temporal"/>
+  <arg name="filters"             default="disparity,spatial"/>
   
   <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
     <arg name="filters" value="$(arg filters)"/>
@@ -15,7 +15,4 @@
         <remap from="image_raw" to="$(arg namespace)/depth/image_rect_raw"/>
         <remap from="image" to="$(arg namespace)/depth/image_meters"/>
   </node>
-
-  <node pkg="tf" type="static_transform_publisher" name="realsense_link_broadcaster"
-        args="0.040 -0.0175 0.066 3.1415 -1.571 0 /panda_hand /camera_link 100" />
 </launch>

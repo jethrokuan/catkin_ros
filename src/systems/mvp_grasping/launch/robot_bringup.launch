@@ -67,4 +67,8 @@
   <node pkg="rviz" type="rviz" output="screen" name="rviz" args="$(arg rviz_command_args)">
     <rosparam command="load" file="$(find panda_moveit_config)/config/kinematics.yaml"/>
   </node>
+
+  <node if="$(eval arg('gripper') == 'panda')" pkg="tf" type="static_transform_publisher" name="realsense_link_broadcaster" args="0.040 -0.0175 0.066 3.1415 -1.571 0 /panda_hand /camera_link 100" />
+
+  <node if="$(eval arg('gripper') == 'robotiq')" pkg="tf" type="static_transform_publisher" name="realsense_link_broadcaster" args="0.040 -0.0175 0.066 3.1415 -1.571 0 /robotiq_arg2f_base_link /camera_link 100" />
 </launch>
