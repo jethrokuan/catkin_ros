@@ -10,6 +10,41 @@
     <param name="gripper" type="str" value="$(arg gripper)"/>
   </node>
 
+  <group if="$(eval arg('gripper') == 'robotiq')">
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find   franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
+    <arg name="gripper_name" default="robotiq" />
+    <arg name="min_gap" default="-0.017" />
+    <arg name="max_gap" default="0.085" />
+    <arg name="min_effort" default="30.0" />
+    <arg name="max_effort" default="100.0" />
+
+    <node name="robotiq_2f_gripper_rtu" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg comport)">
+      <!-- The action server for Robotiq -->
+      <remap from="Robotiq2FGripperRobotInput" to="input"/>
+      <remap from="Robotiq2FGripperRobotOutput" to="output"/>
+    </node>
+
+    <node name="robotiq_2f_gripper_action_server" pkg="robotiq_2f_gripper_action_server"
+          type="robotiq_2f_gripper_action_server_node">
+      <param name="gripper_name" type="str" value="$(arg gripper_name)" />
+      <param name="min_gap" type="double" value="$(arg min_gap)" />
+      <param name="max_gap" type="double" value="$(arg max_gap)" />
+      <param name="min_effort" type="double" value="$(arg min_effort)" />
+      <param name="max_effort" type="double" value="$(arg max_effort)" />
+    </node>
+
+    <!-- start nodes to help visualize the gripper later in RViz -->
+    <group ns="$(arg gripper_name)">
+      <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="100.0"/>
+      </node>
+      <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <rosparam param="source_list">[/joint_states]</rosparam>
+        <rosparam param="use_gui">false</rosparam>
+      </node>
+    </group>
+  </group>
+
   <node pkg="tf2_ros" type="static_transform_publisher" name="virtual_joint_broadcaster_1" args="0 0 0 0 0 0 world panda_link0" />
 
   <include file="$(find franka_control)/launch/franka_control.launch" >
@@ -20,40 +55,6 @@
   <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
     <arg name="load_gripper" value="$(eval arg('gripper') == 'panda')" />
   </include>
-
-  <group if="$(eval arg('gripper') == 'robotiq')">
-    <arg name="gripper_name" default="robotiq" />
-    <arg name="min_gap" default="-0.017" />
-    <arg name="max_gap" default="0.085" />
-    <arg name="min_effort" default="30.0" />
-    <arg name="max_effort" default="100.0" />
-
-    <node name="robotiq_2f_gripper_rtu" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" args="$(arg comport)">
-      <remap from="Robotiq2FGripperRobotInput" to="$(arg gripper_name)/input"/>
-      <remap from="Robotiq2FGripperRobotOutput" to="$(arg gripper_name)/output"/>
-    </node>
-
-    <node name="robotiq_2f_gripper_action_server" pkg="robotiq_2f_gripper_action_server"
-    type="robotiq_2f_gripper_action_server_node">
-      <param name="gripper_name" type="str" value="$(arg gripper_name)" />
-      <param name="min_gap" type="double" value="$(arg min_gap)" />
-      <param name="max_gap" type="double" value="$(arg max_gap)" />
-      <param name="min_effort" type="double" value="$(arg min_effort)" />
-      <param name="max_effort" type="double" value="$(arg max_effort)" />
-    </node>
-
-    <!-- start nodes to help visualize the gripper later in RViz -->
-    <group ns="$(arg gripper_name)">
-      <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
-      <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
-        <param name="publish_frequency" type="double" value="100.0"/>
-      </node>
-      <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-        <rosparam param="source_list">[/joint_states]</rosparam>
-        <rosparam param="use_gui">false</rosparam>
-      </node>
-    </group>
-  </group>
 
   <include file="$(find franka_control_wrappers)/launch/cartesian_velocity_controller.launch">
     <arg name="stopped" value="true" />
