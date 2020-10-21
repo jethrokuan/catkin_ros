@@ -18,13 +18,16 @@ class RobotiqGripper(BaseGripper):
         :param wait: Wait for completion if True
         :return: Bool success
         """
-        client = actionlib.SimpleActionClient('gripper/', control_msgs.msg.GripperCommandAction)
+        client = actionlib.SimpleActionClient('robotiq', control_msgs.msg.GripperCommandAction)
         client.wait_for_server()
-        client.send_goal(control_msgs.msg.GripperCommandGoal(
-            position=width,
-            effort=effort
-        ))
-        return client.wait_for_result()
+        print("HERE")
+        goal = control_msgs.msg.GripperCommandGoal()
+        goal.command.position = width
+        goal.command.max_effort=effort
+        client.send_goal(goal)
+        if wait:
+            return client.wait_for_result()
+        return True
 
     def grasp(self, width, speed=0.1, force=0.1):
         """
