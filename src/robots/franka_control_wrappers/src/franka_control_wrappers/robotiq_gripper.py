@@ -20,10 +20,9 @@ class RobotiqGripper(BaseGripper):
         """
         client = actionlib.SimpleActionClient('robotiq', control_msgs.msg.GripperCommandAction)
         client.wait_for_server()
-        print("HERE")
         goal = control_msgs.msg.GripperCommandGoal()
         goal.command.position = width
-        goal.command.max_effort=effort
+        goal.command.max_effort = effort
         client.send_goal(goal)
         if wait:
             return client.wait_for_result()
@@ -33,4 +32,4 @@ class RobotiqGripper(BaseGripper):
         """
         Perform a grasp.
         """
-        return self.set_gripper(0)
+        return self.set_gripper(-0.01)
