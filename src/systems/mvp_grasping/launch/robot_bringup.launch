@@ -14,7 +14,7 @@
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find   franka_robotiq_description)/robots/panda_robotiq.urdf.xacro" />
     <arg name="gripper_name" default="robotiq" />
     <arg name="min_gap" default="-0.017" />
-    <arg name="max_gap" default="0.085" />
+    <arg name="max_gap" default="0.135" />
     <arg name="min_effort" default="30.0" />
     <arg name="max_effort" default="100.0" />
 
