@@ -33,7 +33,7 @@ class PandaCommander(object):
 
     def save_current_pose(self, name):
         joint_values = self.active_group.get_current_joint_values()
-        self.saved_joint_poses = joint_values
+        self.saved_joint_poses.add("name", joint_values)
         return
 
     def goto_saved_pose(self, name):
