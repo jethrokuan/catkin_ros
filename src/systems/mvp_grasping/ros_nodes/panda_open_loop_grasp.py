@@ -51,7 +51,6 @@ class PandaOpenLoopGraspController(object):
                                    'velocity': 'cartesian_velocity_node_controller'})
         self.cs.switch_controller('moveit')
         self.pc = PandaCommander(group_name='panda_arm', gripper=self.gripper)
-        self.pc.active_group.set_end_effector_link("panda_EE")
 
         self.initial_pose = None
         self.robot_state = None
