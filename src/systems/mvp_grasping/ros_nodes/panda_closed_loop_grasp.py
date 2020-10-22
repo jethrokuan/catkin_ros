@@ -61,11 +61,6 @@ class PandaClosedLoopGraspController(object):
         
         tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
 
-        # Rotate quaternion by 45 deg on the z axis to account for home position being -45deg
-        q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
-        q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
-        best_grasp.pose.orientation = q_new
-
         self.best_grasp = best_grasp
 
     def __recover_robot_from_error(self):
