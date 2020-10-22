@@ -52,7 +52,6 @@ class PandaOpenLoopGraspController(object):
         self.cs.switch_controller('moveit')
         self.pc = PandaCommander(group_name='panda_arm', gripper=self.gripper)
 
-        self.initial_pose = None
         self.robot_state = None
         self.ROBOT_ERROR_DETECTED = False
         self.BAD_UPDATE = False
@@ -62,7 +61,7 @@ class PandaOpenLoopGraspController(object):
         rospy.logerr('Recovering')
         self.pc.recover()
         self.cs.switch_controller('moveit')
-        self.pc.goto_pose(self.initial_pose, velocity=0.1)
+        self.pc.goto_saved_pose("initial")
         rospy.logerr('Done')
         self.ROBOT_ERROR_DETECTED = False
 
@@ -120,7 +119,7 @@ class PandaOpenLoopGraspController(object):
             # close the fingers.
             rospy.sleep(0.2)
             self.pc.gripper.grasp(0, force=1)
-            self.pc.goto_pose(self.initial_pose, velocity=0.1)
+            self.pc.goto_saved_pose("initial")
             
             # Sometimes triggered by closing on something that pushes the robot
             if self.ROBOT_ERROR_DETECTED:
@@ -134,7 +133,7 @@ class PandaOpenLoopGraspController(object):
         self.curr_velo_pub.publish(self.curr_velo)
 
     def go(self):
-        self.initial_pose = self.pc.get_current_pose()
+        self.pc.save_current_pose("initial")
         self.cs.switch_controller('moveit')
         self.pc.gripper.set_gripper(0.1)
 
