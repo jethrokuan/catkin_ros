@@ -38,6 +38,7 @@ class GGraspRt:
         cam_info_topic = rospy.get_param('~camera/info_topic')
         camera_info_msg = rospy.wait_for_message(cam_info_topic, CameraInfo)
         self.cam_K = np.array(camera_info_msg.K).reshape((3, 3))
+        self.gripper = rospy.get_param("~gripper")
 
         self.img_pub = rospy.Publisher('~visualisation', Image, queue_size=1)
         self.cmd_pub = rospy.Publisher('~predict', Grasp, queue_size=1)
@@ -72,6 +73,13 @@ class GGraspRt:
         # Do grasp prediction
         depth_crop, depth_nan_mask = process_depth_image(depth, self.img_crop_size, 300, return_mask=True, crop_y_offset=self.img_crop_y_offset)
         points, angle, width_img, _ = predict(depth_crop, self.model, process_depth=False, depth_nan_mask=depth_nan_mask, filters=(2.0, 2.0, 2.0))
+
+        invalid_mask = np.zeros((300, 300))
+        if self.gripper == "robotiq":
+            invalid_mask[:50, :50] = 1
+            invalid_mask[:50, 250:] = 1
+
+        points[invalid_mask] = 0
 
         # Mask Points Here
         angle -= np.arcsin(camera_rot[0, 1])  # Correct for the rotation of the camera

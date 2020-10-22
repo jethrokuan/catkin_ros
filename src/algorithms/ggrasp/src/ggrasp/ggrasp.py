@@ -76,7 +76,6 @@ def process_depth_image(depth, crop_size, out_size=300, return_mask=False, crop_
     else:
         return depth_crop
 
-
 def predict(depth, model, process_depth=True, crop_size=300, out_size=300, depth_nan_mask=None, crop_y_offset=0, filters=(2.0, 1.0, 1.0)):
     if process_depth:
         depth, depth_nan_mask = process_depth_image(depth, crop_size, out_size=out_size, return_mask=True, crop_y_offset=crop_y_offset)
