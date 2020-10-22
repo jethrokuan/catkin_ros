@@ -7,14 +7,24 @@ gripper series.
 [![Franka Grasp](https://j.gifs.com/L7op6r.gif)](https://www.youtube.com/watch?v=5qAasB84R9E)
 
 Depth images are obtained via an Intel Realsense camera, and passed to a neural
-network to obtain the appropriate grasp point. In the open-loop scenario, the
-grasp point is obtained once, upon network run. In the closed-loop scenario,
-depth images are fed to the ggrasp network in real-time, recomputing the target
-pose.
+network to obtain the appropriate grasp point. The robot controller then plans a
+trajectory towards the target pose to grasp the object.
 
-This depends on `algorithms/ggrasp`, and the `robots/franka` related libraries.
+![Grasp Pipeline](media/grasp_pipeline.png)
 
-# Controllers
+This pipeline depends on many parts of this mono-repo:
+
+1. `algorithms/ggrasp` for the predictor network
+2. `robots/franka_ros`, `robots/libfranka` for Franka-related library support
+3. Our modified `robots/panda_moveit_config`
+4. `robots/robotiq` for support for the robotiq gripper
+5. Our `robots/franka_robotiq_description` for visualizing the Franka with the Robotiq gripper
+6. Our `robots/franka_control_wrappers` for high-level controller programming
+
+For more information on the predictor network and how to train it, see the
+[ggrasp README](../../algorithms/ggrasp/README.md).
+
+# Robot Controllers
 
 ## Open-loop
 
