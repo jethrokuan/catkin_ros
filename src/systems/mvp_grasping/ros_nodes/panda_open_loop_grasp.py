@@ -88,6 +88,11 @@ class PandaOpenLoopGraspController(object):
 
             tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
 
+            # Rotate quaternion by 45 deg on the z axis to account for home position being -45deg
+            q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
+            q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
+            best_grasp.pose.orientation = q_new
+
             # Offset for initial pose.
             initial_offset = 0.05
             gripper_width_offset = 0.03
