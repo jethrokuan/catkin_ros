@@ -22,6 +22,7 @@ class PandaCommander(object):
         self.groups = {}
         self.active_group = None
         self.set_group(group_name)
+        self.saved_joint_poses = {}
 
         self.reset_publisher = rospy.Publisher('/franka_control/error_recovery/goal', ErrorRecoveryActionGoal, queue_size=1)
 
@@ -29,8 +30,18 @@ class PandaCommander(object):
             self.gripper = PandaGripper()
         elif gripper == "robotiq":
             self.gripper = RobotiqGripper()
-            
 
+    def save_current_pose(self, name):
+        joint_values = self.active_group.get_current_joint_values()
+        self.saved_joint_poses = joint_values
+        return
+
+    def goto_saved_pose(self, name):
+        joint_values = self.saved_joint_poses.get(name, None)
+        if joint_values is None:
+            raise ValueError("Cannot find saved pose: {}".format(name))
+        self.goto_joints(joint_values)
+            
     def print_debug_info(self):
         if self.active_group:
             planning_frame = self.active_group.get_planning_frame()
