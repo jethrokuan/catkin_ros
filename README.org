@@ -18,7 +18,7 @@ The workspace is organized as follows:
 
 Packages should be written targeting Python 3, and newer versions of ROS (Noetic and above). Documentation for key systems can be found here:
 
-1. [[file:src/systems/mvp_grasping/README.org][Grasping with the Franka Emika and Franka/Robotiq Grippers]]
+1. [[file:src/systems/mvp_grasping/README.md][Grasping with the Franka Emika and Franka/Robotiq Grippers]]
 2. [[file:docs/apriltag_transform.org][Obtaining the transform between the camera and robot using Apriltag]]
 
 * Setup
