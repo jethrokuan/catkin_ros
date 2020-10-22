@@ -1,5 +1,6 @@
 import tf.transformations as tft
 import dougsm_helpers.tf_helpers as tfh
+import numpy as np
 
 def correct_grasp(grasp, gripper):
     """Corrects the grasp pose given the gripper.
