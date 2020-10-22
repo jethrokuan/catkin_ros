@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda_robotiq">
   <link name="panda_link8"/>
   <joint name="panda_robotiq_attachment_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 ${pi/4}"/>
+    <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
     <parent link="panda_link8"/>
     <child link="robotiq_arg2f_base_link"/>
   </joint>
