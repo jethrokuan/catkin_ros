@@ -1,6 +1,12 @@
 #+TITLE: My Catkin Workspacce
 
-This catkin workspace is organized like a mono-repo, and will be used for all robotics projects.
+This catkin workspace is organized like a mono-repo, and will be used for all
+robotics projects.
+
+#+BEGIN_QUOTE
+The submodule commits have been carefully chosen to match the
+robotics setup at the CLEAR-NUS lab. DO NOT UPGRADE UNNECESSARILY.
+#+END_QUOTE
 
 The workspace is organized as follows:
 
@@ -10,9 +16,14 @@ The workspace is organized as follows:
 - utils :: contains any utilities that may be used throughout other packages
 - systems :: for a particular experimental setup, a certain system might be use a different combination of sensors, robots and algorithms. Each system will be a catkin package that depends on packages, and contain system-specific code.
 
-  Packages should be written targeting Python 3, and newer versions of ROS (Noetic and above).
+Packages should be written targeting Python 3, and newer versions of ROS (Noetic and above). Documentation for key systems can be found here:
 
-* Initial Setup
+1. [[file:src/systems/mvp_grasping/README.org][Grasping with the Franka Emika and Franka/Robotiq Grippers]]
+2. [[file:docs/apriltag_transform.org][Obtaining the transform between the camera and robot using Apriltag]]
+
+* Setup
+
+To ensure that every project in this repository can run, perform the following steps sequentially.
 
 #+BEGIN_SRC bash
 cd ~
@@ -34,7 +45,10 @@ Current MoveIt installed in Kinetic is missing some planners that the new ~panda
 
 ** TODO Move to colcon build system
 
-** TODO Add Training and offline evaluation of GGCNN
+** TODO Build Robotiq 2F Joint State Publisher
+
+Official Robotiq ROS package does not support this.
+
 
 * Reference Documentation
 ** TF
