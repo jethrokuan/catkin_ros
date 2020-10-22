@@ -4,7 +4,7 @@ This is a simple grasping pipeline implemented on the Franka Emika Panda robot.
 Currently, two grippers are supported: the Franka gripper and the Robotiq 2F
 gripper series.
 
-![[Franka Grasp](https://j.gifs.com/L7op6r.gif)](https://www.youtube.com/watch?v=5qAasB84R9E)
+[![Franka Grasp](https://j.gifs.com/L7op6r.gif)](https://www.youtube.com/watch?v=5qAasB84R9E)
 
 Depth images are obtained via an Intel Realsense camera, and passed to a neural
 network to obtain the appropriate grasp point. In the open-loop scenario, the
