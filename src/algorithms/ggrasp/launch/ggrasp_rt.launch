@@ -1,8 +1,9 @@
 <?xml version="1.0" ?>
 <launch>
   <arg name="yaml_path" default="$(optenv YAML_PATH)"/>
+  <arg name="gripper" default="panda"/>
   <rosparam command="load" file="$(find mvp_grasping)/cfg/mvp_grasp.yaml" />
-  <rosparam command="load" file="$(find ggrasp)/cfg/ggrasp.yml" />
-  <arg name="gripper" default="panda">
+  <rosparam if="$(eval arg('gripper') == 'panda')" command="load" file="$(find ggrasp)/cfg/ggrasp.yml" />
+  <rosparam if="$(eval arg('gripper') == 'robotiq)" command="load" file="$(find ggrasp)/cfg/ggrasp_robotiq.yml" />
   <node name="ggrasp" pkg="ggrasp" type="ggrasp_rt.py" output="screen"/>
 </launch>

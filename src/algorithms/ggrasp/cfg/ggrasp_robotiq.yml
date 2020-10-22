@@ -8,4 +8,4 @@ ggrasp:
     crop_size: 300
     crop_y_offset: 40
     fov: 65.5
-  gripper: panda
+  gripper: robotiq
