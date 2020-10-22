@@ -105,7 +105,7 @@ class PandaOpenLoopGraspController(object):
             self.pc.goto_pose(best_grasp.pose, velocity=0.1)
 
             # Reset the position
-            best_grasp.pose.position.z -= initial_offset + LINK_EE_OFFSET
+            best_grasp.pose.position.z -= initial_offset + self.LINK_EE_OFFSET
 
             self.cs.switch_controller('velocity')
             v = Twist()
