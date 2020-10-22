@@ -17,6 +17,7 @@ from franka_msgs.msg import FrankaState, Errors as FrankaErrors
 import tf.transformations as tft
 
 from franka_control_wrappers.panda_commander import PandaCommander
+from mvp_grasping.utils import correct_grasp
 
 import dougsm_helpers.tf_helpers as tfh
 from dougsm_helpers.ros_control import ControlSwitcher
@@ -34,10 +35,10 @@ class PandaOpenLoopGraspController(object):
     Perform open-loop grasps from a single viewpoint using the Panda robot.
     """
     def __init__(self):
-        gripper = rospy.get_param("~gripper", "panda")
-        if gripper == "panda":
+        self.gripper = rospy.get_param("~gripper", "panda")
+        if self.gripper == "panda":
             self.LINK_EE_OFFSET = 0.1384
-        elif gripper == "robotiq":
+        elif self.gripper == "robotiq":
             self.LINK_EE_OFFSET = 0.245
 
         self.curr_velocity_publish_rate = 100.0  # Hz
@@ -49,7 +50,7 @@ class PandaOpenLoopGraspController(object):
         self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
                                    'velocity': 'cartesian_velocity_node_controller'})
         self.cs.switch_controller('moveit')
-        self.pc = PandaCommander(group_name='panda_arm', gripper=gripper)
+        self.pc = PandaCommander(group_name='panda_arm', gripper=self.gripper)
         self.pc.active_group.set_end_effector_link("panda_EE")
 
         self.initial_pose = None
@@ -83,16 +84,10 @@ class PandaOpenLoopGraspController(object):
             self.cs.switch_controller('moveit')
 
             best_grasp = rospy.wait_for_message("/ggrasp/predict", Grasp)
-            print(best_grasp)
+            best_grasp = correct_grasp(best_grasp, self.gripper)
             self.best_grasp = best_grasp
 
             tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
-
-            # Rotate quaternion by 45 deg on the z axis to account for home position being -45deg
-            q_rot = tft.quaternion_from_euler(0, 0, np.pi/4)
-            q_new = tfh.list_to_quaternion(tft.quaternion_multiply(tfh.quaternion_to_list(best_grasp.pose.orientation), q_rot))
-            best_grasp.pose.orientation = q_new
-
             # Offset for initial pose.
             initial_offset = 0.05
             gripper_width_offset = 0.03
