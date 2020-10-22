@@ -40,8 +40,6 @@ class PandaOpenLoopGraspController(object):
         elif gripper == "robotiq":
             self.LINK_EE_OFFSET = 0.245
 
-        self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
-
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
         self.max_velo = 0.10
@@ -127,7 +125,6 @@ class PandaOpenLoopGraspController(object):
             # close the fingers.
             rospy.sleep(0.2)
             self.pc.gripper.grasp(0, force=1)
-            self.clear_octomap_srv.call() # We need to clear the octomap so moveit does not complain of collisions
             self.pc.goto_pose(self.initial_pose, velocity=0.1)
             
             # Sometimes triggered by closing on something that pushes the robot

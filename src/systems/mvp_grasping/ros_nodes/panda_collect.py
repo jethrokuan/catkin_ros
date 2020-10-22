@@ -49,8 +49,7 @@ class PandaCollectController(object):
         ggrasp_service_name = '/ggrasp'
         rospy.wait_for_service(ggrasp_service_name + '/predict')
         self.ggrasp_srv = rospy.ServiceProxy(ggrasp_service_name + '/predict', GraspPrediction)
-        self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
-
+        
         self.save_dir = "./ggrasp_data/"
         self.depth_img = None
         self.grasp = None
@@ -144,7 +143,6 @@ class PandaCollectController(object):
             # close the fingers.
             rospy.sleep(0.2)
             self.pc.gripper.grasp(0, force=1)
-            self.clear_octomap_srv.call() # We need to clear the octomap so moveit does not complain of collisions
             self.pc.goto_pose(self.initial_pose, velocity=0.1)
             
             # Sometimes triggered by closing on something that pushes the robot
