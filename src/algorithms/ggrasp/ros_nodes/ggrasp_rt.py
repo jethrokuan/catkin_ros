@@ -74,10 +74,10 @@ class GGraspRt:
         depth_crop, depth_nan_mask = process_depth_image(depth, self.img_crop_size, 300, return_mask=True, crop_y_offset=self.img_crop_y_offset)
         points, angle, width_img, _ = predict(depth_crop, self.model, process_depth=False, depth_nan_mask=depth_nan_mask, filters=(2.0, 2.0, 2.0))
 
-        invalid_mask = np.zeros((300, 300))
+        invalid_mask = np.zeros((300, 300)).astype("bool")
         if self.gripper == "robotiq":
-            invalid_mask[:50, :50] = 1
-            invalid_mask[:50, 250:] = 1
+            invalid_mask[:50, :50] = True
+            invalid_mask[:50, 250:] = True
 
         points[invalid_mask] = 0
 
