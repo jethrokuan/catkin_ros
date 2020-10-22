@@ -35,6 +35,11 @@ class PandaOpenLoopGraspController(object):
     """
     def __init__(self):
         gripper = rospy.get_param("~gripper", "panda")
+        if gripper == "panda":
+            self.LINK_EE_OFFSET = 0.1384
+        elif gripper == "robotiq":
+            self.LINK_EE_OFFSET = 0.245
+
         self.clear_octomap_srv = rospy.ServiceProxy('/clear_octomap', Empty)
 
         self.curr_velocity_publish_rate = 100.0  # Hz
@@ -92,11 +97,10 @@ class PandaOpenLoopGraspController(object):
             # Offset for initial pose.
             initial_offset = 0.05
             gripper_width_offset = 0.03
-            LINK_EE_OFFSET = 0.1384
 
             # Add some limits, plus a starting offset.
             # best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
-            best_grasp.pose.position.z += initial_offset + LINK_EE_OFFSET  # Offset from end effector position to
+            best_grasp.pose.position.z += initial_offset + self.LINK_EE_OFFSET  # Offset from end effector position to
 
             self.pc.gripper.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
             rospy.sleep(0.1)

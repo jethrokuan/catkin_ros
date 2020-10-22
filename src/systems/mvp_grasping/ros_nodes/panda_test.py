@@ -84,7 +84,7 @@ class PandaOpenLoopGraspController(object):
         new_pose.position.z += 0.05
         self.pc.goto_pose(new_pose, velocity=0.1)
         rospy.sleep(2)
-        self.pc.goto_pose(initial_pose, velocity=0.1)
+        self.pc.goto_pose(self.initial_pose, velocity=0.1)
         self.pc.gripper.set_gripper(-0.01)
         rospy.sleep(2)
         self.pc.gripper.set_gripper(0.1)
