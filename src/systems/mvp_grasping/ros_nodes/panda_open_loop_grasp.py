@@ -119,7 +119,6 @@ class PandaOpenLoopGraspController(object):
             # close the fingers.
             rospy.sleep(0.2)
             self.pc.gripper.grasp(0, force=1)
-            self.pc.goto_saved_pose("initial")
             
             # Sometimes triggered by closing on something that pushes the robot
             if self.ROBOT_ERROR_DETECTED:
@@ -133,16 +132,18 @@ class PandaOpenLoopGraspController(object):
         self.curr_velo_pub.publish(self.curr_velo)
 
     def go(self):
-        self.pc.save_current_pose("initial")
         self.cs.switch_controller('moveit')
+        self.pc.goto_saved_pose("start")
         self.pc.gripper.set_gripper(0.1)
 
-        self.cs.switch_controller('velocity')
         grasp_ret = self.__execute_best_grasp()
         if not grasp_ret or self.ROBOT_ERROR_DETECTED:
             rospy.logerr('Something went wrong, aborting this run')
             if self.ROBOT_ERROR_DETECTED:
                 self.__recover_robot_from_error()
+        self.cs.switch_controller('moveit')
+        
+        self.pc.goto_saved_pose("bin")
         self.pc.gripper.set_gripper(0.1)
 
 if __name__ == '__main__':
