@@ -26,6 +26,11 @@ For more information on the predictor network and how to train it, see the
 
 # Robot Controllers
 
+In this repository, we provide 3 simple controllers. These controllers are able
+to utilize the output of the grasp predictor network in real-time.
+
+The following commands are for running the system with the Franka gripper.
+
 ## Open-loop
 
     roslaunch mvp_grasping wrist_realsense.launch # Setup realsense camera
@@ -34,8 +39,8 @@ For more information on the predictor network and how to train it, see the
     rosrun mvp_grasping panda_open_loop_grasp.py  # Run open-loop scenario
 
 1.  `ggrasp_rt` continuously receives depth images from the intel realsense, and
-    produces target grasp poses (at `/ggrasp/predict`)
-2.  A single target grasp pose is read, and used
+    produces target grasp poses at `/ggrasp/predict`
+2.  A single target grasp pose is read, and the target grasp pose is computed
 3.  The robot moves to a pregrasp pose `0.05m` above the target pose, and
     performs a descent using velocity control to grasp the object
 4.  The robot then returns to its initial position and releases the gripper
@@ -64,7 +69,7 @@ Replace the commands:
 
 with:
 
-    roslaunch mvp_grasping robot_bringup.launch gripper:=robotiq
+    roslaunch mvp_grasping robot_bringup.launch gripper:=robotiq comport:=/dev/ttyUSB1
 
 and the `rosrun` commands e.g.:
 
@@ -97,14 +102,20 @@ fine-tuning the model on relevant objects.
 The Intel Realsense node contains multiple filters for post-processing of the
 depth image. By default, the temporal filter is turned on. This filter produces
 **poor** results for the closed-loop grasping scenario, as the post-processed
-depth image using a temporal filter with a moving camera is very poor. Ensure
-that the temporal filter is turned off.
+depth image using a temporal filter with a moving camera is poor. Ensure that
+the temporal filter is turned off. We have turned it off in our
+`wrist_realsense.launch` file.
 
-## Clearing the Octomap
+## Disabling the Octomap
 
 To prevent moveit from erroring, claiming that the end-effector is in contact
-with the object it has grasped, we need to clear the octomap.
+with the object it has grasped, we need to clear or disable the octomap. This is
+particularly problematic with the Robotiq gripper: the mount we designed has the
+gripper in vision, which causes the octomap to populate incorrectly when the robot
+moves.
 
-Alternatively, one should instead disable octomaps altogether, and manually add
-the planar table to the collision scene. This has the downside that moveit
-cannot plain collision avoidance against objects.
+We have disabled the octomap in our version of `robots/panda_moveit_config`.
+This unfortunately means that the robot does not use sensor information during
+planning.
+
+TODO: Manually add the table/bin into the scene as collision objects 
