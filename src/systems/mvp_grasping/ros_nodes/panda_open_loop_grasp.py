@@ -145,6 +145,7 @@ class PandaOpenLoopGraspController(object):
         
         self.pc.goto_saved_pose("bin")
         self.pc.gripper.set_gripper(0.1)
+        self.pc.goto_saved_pose("start")
 
 if __name__ == '__main__':
     rospy.init_node('panda_open_loop_grasp')
