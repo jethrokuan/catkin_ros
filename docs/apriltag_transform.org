@@ -1,1 +1,0 @@
-#+title: Obtaining the transform between the camera and robot using Apriltag
