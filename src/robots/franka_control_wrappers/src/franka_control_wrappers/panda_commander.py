@@ -24,7 +24,7 @@ class PandaCommander(object):
         self.set_group(group_name)
         self.saved_joint_poses = {}
 
-        print(rospy.get_param("/panda_setup/saved_joint_values/")
+        print(rospy.get_param("/panda_setup/saved_joint_values/"))
         self.reset_publisher = rospy.Publisher('/franka_control/error_recovery/goal', ErrorRecoveryActionGoal, queue_size=1)
 
         if gripper == "panda":
