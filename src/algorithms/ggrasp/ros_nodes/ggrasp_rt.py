@@ -95,7 +95,7 @@ class GGraspRt:
 
         maxes = peak_local_max(points, min_distance=10, threshold_abs=0.1, num_peaks=3)
         if maxes.shape[0] == 0:
-            rospy.logerror("No Local Maxes")
+            rospy.logerr("No Local Maxes")
             return
         
         if self.prev_mp is None:
