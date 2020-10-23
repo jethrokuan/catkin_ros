@@ -22,7 +22,7 @@ This pipeline depends on many parts of this mono-repo:
 6. Our `robots/franka_control_wrappers` for high-level controller programming
 
 For more information on the predictor network and how to train it, see the
-[ggrasp README](../../algorithms/ggrasp/README.org).
+[ggrasp README](../../algorithms/ggrasp/README.md).
 
 # Robot Controllers
 

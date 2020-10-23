@@ -1,33 +1,25 @@
-#+title: Generative Grasping (ggrasp)
-
 [![Real-time Grasp Prediction](https://j.gifs.com/wVBLXm.gif)](https://youtu.be/yYmkOf3FZQ8)
 
 This sub-project contains the code for training and deploying two models:
 
-1. [[\[\[https://github.com/dougsm/ggcnn\]\]][Generative Grasping CNN (GGCNN)]]
+1.  [Generative Grasping CNN (GGCNN)](https://github.com/dougsm/ggcnn)
 
-#+BEGIN_QUOTE
-GG-CNN is a lightweight, fully-convolutional network which predicts the quality
-and pose of antipodal grasps at every pixel in an input depth image. The
-lightweight and single-pass generative nature of GG-CNN allows for fast
-execution and closed-loop control, enabling accurate grasping in dynamic
-environments when objects are moved during the grasp attempt.
-#+END_QUOTE
+> GG-CNN is a lightweight, fully-convolutional network which predicts the quality
+> and pose of antipodal grasps at every pixel in an input depth image. The
+> lightweight and single-pass generative nature of GG-CNN allows for fast
+> execution and closed-loop control, enabling accurate grasping in dynamic
+> environments when objects are moved during the grasp attempt.
 
-2. [[https://github.com/skumra/robotic-grasping][GR-ConvNet]]
+1.  [GR-ConvNet](https://github.com/skumra/robotic-grasping)
 
-#+BEGIN_QUOTE
-GR-ConvNet is a novel generative residual convolutional neural network based
-model architecture which detects objects in the camera’s field of view and
-predicts a suitable antipodal grasp configuration for the objects in the image.
-#+END_QUOTE
+> GR-ConvNet is a novel generative residual convolutional neural network based
+> model architecture which detects objects in the camera’s field of view and
+> predicts a suitable antipodal grasp configuration for the objects in the image.
 
-* Motivation
+# Motivation
 
-#+BEGIN_QUOTE
-This is a brief introduction to the network, for more details, read the original
-papers.
-#+END_QUOTE
+> This is a brief introduction to the network, for more details, read the original
+> papers.
 
 Many of the prior art on grasping rely on complex pipelines that take a long
 time to execute. For example, DexNet uses a network to generate grasp candidates
@@ -41,14 +33,14 @@ prediction of antipodal grasp poses, and a quality measure for every pixel in
 the input depth image. These networks can produce predictions in real time,
 allowing for closed-loop control.
 
-* Obtaining the Training Data
+# Obtaining the Training Data
 
 The networks can be trained on two datasets:
 
-1. [[http://pr.cs.cornell.edu/grasping/rect_data/data.php][The Cornell Grasping Dataset]]
-2. [[https://jacquard.liris.cnrs.fr/][The Jacquard Dataset]]
+1.  [The Cornell Grasping Dataset](http://pr.cs.cornell.edu/grasping/rect_data/data.php)
+2.  [The Jacquard Dataset](https://jacquard.liris.cnrs.fr/)
 
-* Modifications to the Original Works
+# Modifications to the Original Works
 
 The GG-CNN2 paper uses a per-pixel MSE loss. In other works on depth estimation
 and optical flow, it is more common to use a smooth L1 loss. This was used in
@@ -62,16 +54,15 @@ of the second-order gradients for the output images. We find that the smoothness
 loss not only significantly improves the IOU metric we use, but also improves
 grasp stability when applied to our grasp controllers.
 
-* Training the Models
+# Training the Models
 
-To train the models, we use guild.ai. First, navigate to the ~src~ folder (which
+To train the models, we use guild.ai. First, navigate to the `src` folder (which
 contains the guild.yml).
 
-Run ~guild operationss~ to see a list of operations. For example, to train the ggcnn2 model:
+Run `guild operations` to see a list of operations. For example, to train the ggcnn2 model:
 
-#+BEGIN_SRC bash
-guild run ggcnn2:train loss:smooth_l1_loss smoothness_weight:0.5
-dataset:JacquardDataset dataset-path:/path/to/dataset
-#+END_SRC
+    guild run ggcnn2:train loss:smooth_l1_loss smoothness_weight:0.5
+    dataset:JacquardDataset dataset-path:/path/to/dataset
 
-Sample trained models can be found in the ~saved_models~ folder.
+Sample trained models can be found in the `saved_models` folder.
+
