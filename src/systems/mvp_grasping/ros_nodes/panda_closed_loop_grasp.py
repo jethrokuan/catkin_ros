@@ -34,8 +34,6 @@ class PandaClosedLoopGraspController(object):
     """
     def __init__(self):
         gripper = rospy.get_param("~gripper", "panda")
-        self.initial_pose = None
-        
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
         self.grasp_sub = rospy.Subscriber("/ggrasp/predict", Grasp, self.grasp_cmd_callback, queue_size=1)
@@ -72,7 +70,7 @@ class PandaClosedLoopGraspController(object):
         rospy.logerr('Recovering')
         self.pc.recover()
         self.cs.switch_controller('moveit')
-        self.pc.goto_pose(self.initial_pose, velocity=0.1)
+        self.pc.goto_saved_pose("start")
         rospy.logerr('Done')
         self.ROBOT_ERROR_DETECTED = False
 
@@ -151,7 +149,6 @@ class PandaClosedLoopGraspController(object):
         # close the fingers.
         rospy.sleep(0.2)
         self.pc.gripper.grasp(0, force=1)
-        self.pc.goto_pose(self.initial_pose, velocity=0.1)
 
         # Sometimes triggered by closing on something that pushes the robot
         if self.ROBOT_ERROR_DETECTED:
@@ -166,7 +163,7 @@ class PandaClosedLoopGraspController(object):
 
     def go(self):
         self.cs.switch_controller('moveit')
-        self.initial_pose = self.pc.get_current_pose()
+        self.pc.goto_saved_pose("start")
         self.pc.gripper.set_gripper(0.1)
         self.cs.switch_controller('velocity')
         grasp_ret = self.__execute_grasp()
@@ -174,7 +171,9 @@ class PandaClosedLoopGraspController(object):
             rospy.logerr('Something went wrong, aborting this run')
             if self.ROBOT_ERROR_DETECTED:
                 self.__recover_robot_from_error()
+        self.pc.goto_saved_pose("bin")
         self.pc.gripper.set_gripper(0.1)
+        self.pc.goto_saved_pose("start")
 
 if __name__ == '__main__':
     rospy.init_node('panda_closed_loop_grasp')
