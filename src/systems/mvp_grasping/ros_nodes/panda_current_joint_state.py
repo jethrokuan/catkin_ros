@@ -12,4 +12,4 @@ if __name__ == '__main__':
                           'velocity': 'cartesian_velocity_node_controller'})
     cs.switch_controller('moveit')
     pc = PandaCommander(group_name='panda_arm', gripper=gripper)
-    print(pc.get_current_pose())
+    print(pc.active_group.get_current_joint_values())
