@@ -1,6 +1,8 @@
 import rospy
 import actionlib
 
+import json
+
 import moveit_commander
 from moveit_commander.conversions import list_to_pose
 
@@ -27,7 +29,7 @@ class PandaCommander(object):
         preset_joint_values = rospy.get_param("/panda_setup/saved_joint_values/")
 
         for name, joint_values in enumerate(preset_joint_values):
-            vs = [v for _, v in sorted(joint_values.items())]
+            vs = [v for _, v in sorted(json.loads(joint_values).items())]
             self.saved_joint_poses[name] = vs
 
         print(self.saved_joint_poses)
