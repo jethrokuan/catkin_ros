@@ -119,3 +119,13 @@ This unfortunately means that the robot does not use sensor information during
 planning.
 
 TODO: Manually add the table/bin into the scene as collision objects 
+
+## Correcting grasp positions for different grippers
+
+The MoveIt uses `panda_link8` as the end-effector link. This link is rotated at
+a 45 degrees relative to the camera on the z-axis. Hence, when planning a grasp, it is necessary to first correct the grasp pose (see [MoveIt's Pick & Place Tutorial](https://ros-planning.github.io/moveit_tutorials/doc/pick_place/pick_place_tutorial.html#setting-grasp-pose)). This is where our `correct_grasp` function comes in. 
+
+Somehow computing the TF transform between `panda_EE` and `panda_link8`, and
+using the translation and rotation from there results in the planner failing
+with "No motion plan found", despite the target pose being the same. See commit
+hash 031c6c3.
