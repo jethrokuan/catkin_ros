@@ -32,11 +32,7 @@ class PandaOpenLoopGraspController(object):
 
     def __init__(self):
         self.gripper = rospy.get_param("~gripper", "panda")
-        if self.gripper == "panda":
-            self.LINK_EE_OFFSET = 0.1384
-        elif self.gripper == "robotiq":
-            self.LINK_EE_OFFSET = 0.245
-
+        
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher(
             "/cartesian_velocity_node_controller/cartesian_velocity",
@@ -91,26 +87,24 @@ class PandaOpenLoopGraspController(object):
         self.cs.switch_controller("moveit")
 
         best_grasp = rospy.wait_for_message("/ggrasp/predict", Grasp)
-        best_grasp = correct_grasp(best_grasp, self.gripper)
-        self.best_grasp = best_grasp
 
         tfh.publish_pose_as_transform(best_grasp.pose, "panda_link0", "G", 0.5)
+        best_grasp = correct_grasp(best_grasp)
+        self.best_grasp = best_grasp
+
         # Offset for initial pose.
         initial_offset = 0.05
         gripper_width_offset = 0.03
 
         # Add some limits, plus a starting offset.
         # best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
-        best_grasp.pose.position.z += (
-            initial_offset + self.LINK_EE_OFFSET
-        )  # Offset from end effector position to
-
+        best_grasp.pose.position.z += initial_offset
         self.pc.gripper.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
         rospy.sleep(0.1)
         self.pc.goto_pose(best_grasp.pose, velocity=0.1)
 
         # Reset the position
-        best_grasp.pose.position.z -= initial_offset + self.LINK_EE_OFFSET
+        best_grasp.pose.position.z -= initial_offset
 
         self.cs.switch_controller("velocity")
         v = Twist()
