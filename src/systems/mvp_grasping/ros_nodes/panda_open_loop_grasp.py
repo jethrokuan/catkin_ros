@@ -24,12 +24,6 @@ from dougsm_helpers.ros_control import ControlSwitcher
 
 from ggrasp.msg import Grasp
 
-from mvp_grasping.panda_base_grasping_controller import Logger, Run, Experiment
-
-Run.log_properties = ['success', 'time', 'quality']
-Experiment.log_properties = ['success_rate', 'mpph']
-
-
 class PandaOpenLoopGraspController(object):
     """
     Perform open-loop grasps from a single viewpoint using the Panda robot.
