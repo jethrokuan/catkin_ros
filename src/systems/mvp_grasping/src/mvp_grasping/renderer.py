@@ -13,7 +13,7 @@ class Renderer:
         self.fov = fov
         self.near_plane = near_plane
         self.far_plane = far_plane
-        aspect = self.im_width/self.im_height
+        aspect = self.im_width / self.im_height
         self.pm = pb.computeProjectionMatrixFOV(fov, aspect, near_plane, far_plane)
         self.camera_pos = np.array([0, 0, 0.5])
         self.camera_rot = self._rotation_matrix([0, np.pi, 0])
@@ -56,9 +56,15 @@ class Renderer:
             # Random orientation
             r = np.random.rand()
             orientation = [r ** 2, 0, 0, (1 - r) ** 2]
-        c_id = pb.createCollisionShape(shapeType=pb.GEOM_MESH, fileName=mesh, meshScale=scale)
-        o_id = pb.createMultiBody(baseMass=mass, baseCollisionShapeIndex=c_id, basePosition=position,
-                                baseOrientation=orientation)
+        c_id = pb.createCollisionShape(
+            shapeType=pb.GEOM_MESH, fileName=mesh, meshScale=scale
+        )
+        o_id = pb.createMultiBody(
+            baseMass=mass,
+            baseCollisionShapeIndex=c_id,
+            basePosition=position,
+            baseOrientation=orientation,
+        )
         self.objects.append(o_id)
         return o_id
 
@@ -69,33 +75,41 @@ class Renderer:
     @property
     def camera_intrinsic(self):
         # Thanks http://kgeorge.github.io/2014/03/08/calculating-opengl-perspective-matrix-from-opencv-intrinsic-matrix
-        return np.array([
-            [self.pm[0]*self.im_width/2, 0, self.im_width/2],
-            [0, self.pm[5]*self.im_height/2, self.im_height/2],
-            [0, 0, 1]
-        ])
+        return np.array(
+            [
+                [self.pm[0] * self.im_width / 2, 0, self.im_width / 2],
+                [0, self.pm[5] * self.im_height / 2, self.im_height / 2],
+                [0, 0, 1],
+            ]
+        )
 
     def _rotation_matrix(self, rpy):
         r, p, y = rpy
 
-        Rx = np.array([
-            [1, 0, 0, 0],
-            [0, np.cos(r), -np.sin(r), 0],
-            [0, np.sin(r), np.cos(r), 0],
-            [0, 0, 0, 1]
-        ])
-        Ry = np.array([
-            [np.cos(p), 0, np.sin(p), 0],
-            [0, 1, 0, 0],
-            [-np.sin(p), 0, np.cos(p), 0],
-            [0, 0, 0, 1]
-        ])
-        Rz = np.array([
-            [np.cos(y), -np.sin(y), 0, 0],
-            [np.sin(y), np.cos(y), 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ])
+        Rx = np.array(
+            [
+                [1, 0, 0, 0],
+                [0, np.cos(r), -np.sin(r), 0],
+                [0, np.sin(r), np.cos(r), 0],
+                [0, 0, 0, 1],
+            ]
+        )
+        Ry = np.array(
+            [
+                [np.cos(p), 0, np.sin(p), 0],
+                [0, 1, 0, 0],
+                [-np.sin(p), 0, np.cos(p), 0],
+                [0, 0, 0, 1],
+            ]
+        )
+        Rz = np.array(
+            [
+                [np.cos(y), -np.sin(y), 0, 0],
+                [np.sin(y), np.cos(y), 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
+        )
         return np.linalg.multi_dot([Rz, Ry, Rx])
 
     def draw_camera_pos(self):
@@ -109,17 +123,24 @@ class Renderer:
         pb.addUserDebugLine(start, end_z, [0, 0, 1], 5)
 
     def render(self):
-        if np.all(self._rendered_pos == self.camera_pos) and np.all(self._rendered_rot == self.camera_rot):
+        if np.all(self._rendered_pos == self.camera_pos) and np.all(
+            self._rendered_rot == self.camera_rot
+        ):
             return self._rendered
 
         target = self.camera_pos + np.dot(self.camera_rot, [0, 0, 1.0, 1.0])[0:3]
         up = np.dot(self.camera_rot, [0, -1.0, 0, 1.0])[0:3]
         vm = pb.computeViewMatrix(self.camera_pos, target, up)
 
-        i_arr = pb.getCameraImage(self.im_width, self.im_height, vm, self.pm,
-                                  shadow=0,
-                                  renderer=pb.ER_TINY_RENDERER)
-                                  # renderer=pb.ER_BULLET_HARDWARE_OPENGL)
+        i_arr = pb.getCameraImage(
+            self.im_width,
+            self.im_height,
+            vm,
+            self.pm,
+            shadow=0,
+            renderer=pb.ER_TINY_RENDERER,
+        )
+        # renderer=pb.ER_BULLET_HARDWARE_OPENGL)
 
         # Record the position of the camera, and don't re-render if it hasn't moved.
         self._rendered = i_arr
@@ -134,26 +155,56 @@ class Renderer:
     def get_depth_metres(self, noise=0.001):
         d = self.render()[3]
         # Linearise to metres
-        return 2*self.far_plane*self.near_plane/(self.far_plane + self.near_plane - (self.far_plane - self.near_plane)*(2*d - 1)) + np.random.randn(self.im_height, self.im_width) * noise
+        return (
+            2
+            * self.far_plane
+            * self.near_plane
+            / (
+                self.far_plane
+                + self.near_plane
+                - (self.far_plane - self.near_plane) * (2 * d - 1)
+            )
+            + np.random.randn(self.im_height, self.im_width) * noise
+        )
 
     def px_to_xyz_metres(self, x_px, y_px, z=None):
         K = self.camera_intrinsic
         if z is None:
             z = self.get_depth_metres()[y_px, x_px]
         else:
-            z = np.array([z]*x_px.shape[0])
+            z = np.array([z] * x_px.shape[0])
         x = (x_px - K[0, 2]) / K[0, 0] * z
         y = (y_px - K[1, 2]) / K[1, 1] * z
-        return np.dot(self.camera_rot[0:3, 0:3], np.stack((x, y, z))) + self.camera_pos.reshape((3, 1))
+        return np.dot(
+            self.camera_rot[0:3, 0:3], np.stack((x, y, z))
+        ) + self.camera_pos.reshape((3, 1))
 
     def get_xyz_metres(self):
         K = self.camera_intrinsic
         z = self.get_depth_metres()
         # Pixel to physical coords in camera frame
-        x = ((np.vstack((np.arange(0, self.im_width, 1, np.float), )*self.im_height) - K[0, 2])/K[0, 0] * z).flatten()
-        y = ((np.vstack((np.arange(0, self.im_height, 1, np.float), )*self.im_width).T - K[1,2])/K[1, 1] * z).flatten()
+        x = (
+            (
+                np.vstack((np.arange(0, self.im_width, 1, np.float),) * self.im_height)
+                - K[0, 2]
+            )
+            / K[0, 0]
+            * z
+        ).flatten()
+        y = (
+            (
+                np.vstack(
+                    (np.arange(0, self.im_height, 1, np.float),) * self.im_width
+                ).T
+                - K[1, 2]
+            )
+            / K[1, 1]
+            * z
+        ).flatten()
         # Convert to world frame.
-        return np.dot(self.camera_rot[0:3, 0:3], np.stack((x, y, z.flatten()))) + self.camera_pos.reshape((3, 1))
+        return np.dot(
+            self.camera_rot[0:3, 0:3], np.stack((x, y, z.flatten()))
+        ) + self.camera_pos.reshape((3, 1))
 
     def get_rgb(self):
         return self.render()[2]
@@ -171,7 +222,7 @@ class Renderer:
             return
         z = p - self.camera_pos
         up = np.dot(self.camera_rot, [0, 1.0, 0, 1.0])[0:3]
-        #up = np.array([0, 1.0, 0])
+        # up = np.array([0, 1.0, 0])
         x = np.cross(up, z)
         y = np.cross(z, x)
 
@@ -202,40 +253,40 @@ class Renderer:
 
     def move_camera_key(self, k):
         pos_step = 0.01
-        ang_step = np.pi * 5/180
-        if k == ord('q'):
+        ang_step = np.pi * 5 / 180
+        if k == ord("q"):
             self.move_local([pos_step, 0, 0])
-        elif k == ord('w'):
+        elif k == ord("w"):
             self.move_local([-pos_step, 0, 0])
-        elif k == ord('a'):
+        elif k == ord("a"):
             self.move_local([0, pos_step, 0])
-        elif k == ord('s'):
+        elif k == ord("s"):
             self.move_local([0, -pos_step, 0])
-        elif k == ord('z'):
+        elif k == ord("z"):
             self.move_local([0, 0, pos_step])
-        elif k == ord('x'):
+        elif k == ord("x"):
             self.move_local([0, 0, -pos_step])
 
-        elif k == ord('e'):
+        elif k == ord("e"):
             self.rotate_local([ang_step, 0, 0])
-        elif k == ord('r'):
+        elif k == ord("r"):
             self.rotate_local([-ang_step, 0, 0])
-        elif k == ord('d'):
+        elif k == ord("d"):
             self.rotate_local([0, ang_step, 0])
-        elif k == ord('f'):
+        elif k == ord("f"):
             self.rotate_local([0, -ang_step, 0])
-        elif k == ord('c'):
+        elif k == ord("c"):
             self.rotate_local([0, 0, ang_step])
-        elif k == ord('v'):
+        elif k == ord("v"):
             self.rotate_local([0, 0, -ang_step])
 
-        elif k == ord('o'):
+        elif k == ord("o"):
             self.camera_pos = np.array([0, 0, 0.5])
             self.camera_rot = self._rotation_matrix([0, np.pi, 0])
             self.draw_camera_pos()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Testing things
     import cv2
     import matplotlib.pyplot as plt
@@ -247,9 +298,10 @@ if __name__ == '__main__':
     ff = 2.0
     r = Renderer(im_w, im_h, im_fov, nf, ff, DEBUG=True)
 
-    r.load_urdf('plane.urdf')
+    r.load_urdf("plane.urdf")
     import glob
-    objs = glob.glob('../obj/*.obj')
+
+    objs = glob.glob("../obj/*.obj")
     print(objs)
     for obj in objs:
         r.load_mesh(obj)
@@ -264,28 +316,30 @@ if __name__ == '__main__':
     pitch = -40
     dist = 0.4
 
-    cv2.namedWindow('depth', cv2.WINDOW_NORMAL)
-    cv2.namedWindow('rgb', cv2.WINDOW_NORMAL)
+    cv2.namedWindow("depth", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("rgb", cv2.WINDOW_NORMAL)
 
     for i in range(100):
         rad = 0.2
         height = (0.5, 0.3)
-        newpos = [np.cos(i%25 * np.pi * 2 / 25.0) * rad,
-                  np.sin(i%25 * np.pi * 2 / 25.0) * rad,
-                  i/100.0 * (height[1] - height[0]) + height[0]]
+        newpos = [
+            np.cos(i % 25 * np.pi * 2 / 25.0) * rad,
+            np.sin(i % 25 * np.pi * 2 / 25.0) * rad,
+            i / 100.0 * (height[1] - height[0]) + height[0],
+        ]
         r.move_to(newpos)
         if i == 0:
             r.look_at([0, 0, 0])
-        r.rotate_world([0, 0, 1.0/25.0 * np.pi * 2])
+        r.rotate_world([0, 0, 1.0 / 25.0 * np.pi * 2])
 
         dep = r.get_depth_metres()
-        cv2.imshow('depth', 1 - (dep - dep.min())/(dep.max() - dep.min()))
+        cv2.imshow("depth", 1 - (dep - dep.min()) / (dep.max() - dep.min()))
         rgb = r.get_rgb()
         cv2.circle(rgb, (75, 75), 10, (0, 0, 255))
-        cv2.imshow('rgb', rgb)
-        #cv2.imshow('depth', dep)
+        cv2.imshow("rgb", rgb)
+        # cv2.imshow('depth', dep)
         cv2.waitKey(1000)
-        #k = cv2.waitKey(0)
+        # k = cv2.waitKey(0)
         # if k == ord('p'):
         #     break
-        #r.move_camera_key(k)
+        # r.move_camera_key(k)

@@ -24,10 +24,12 @@ from dougsm_helpers.ros_control import ControlSwitcher
 
 from ggrasp.msg import Grasp
 
+
 class PandaOpenLoopGraspController(object):
     """
     Perform open-loop grasps from a single viewpoint using the Panda robot.
     """
+
     def __init__(self):
         self.gripper = rospy.get_param("~gripper", "panda")
         if self.gripper == "panda":
@@ -36,89 +38,108 @@ class PandaOpenLoopGraspController(object):
             self.LINK_EE_OFFSET = 0.245
 
         self.curr_velocity_publish_rate = 100.0  # Hz
-        self.curr_velo_pub = rospy.Publisher('/cartesian_velocity_node_controller/cartesian_velocity', Twist, queue_size=1)
+        self.curr_velo_pub = rospy.Publisher(
+            "/cartesian_velocity_node_controller/cartesian_velocity",
+            Twist,
+            queue_size=1,
+        )
         self.max_velo = 0.10
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
 
-        self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
-                                   'velocity': 'cartesian_velocity_node_controller'})
-        self.cs.switch_controller('moveit')
-        self.pc = PandaCommander(group_name='panda_arm', gripper=self.gripper)
+        self.cs = ControlSwitcher(
+            {
+                "moveit": "position_joint_trajectory_controller",
+                "velocity": "cartesian_velocity_node_controller",
+            }
+        )
+        self.cs.switch_controller("moveit")
+        self.pc = PandaCommander(group_name="panda_arm", gripper=self.gripper)
 
         self.robot_state = None
         self.ROBOT_ERROR_DETECTED = False
         self.BAD_UPDATE = False
-        rospy.Subscriber('/franka_state_controller/franka_states', FrankaState, self.__robot_state_callback, queue_size=1)
+        rospy.Subscriber(
+            "/franka_state_controller/franka_states",
+            FrankaState,
+            self.__robot_state_callback,
+            queue_size=1,
+        )
 
     def __recover_robot_from_error(self):
-        rospy.logerr('Recovering')
+        rospy.logerr("Recovering")
         self.pc.recover()
-        self.cs.switch_controller('moveit')
+        self.cs.switch_controller("moveit")
         self.pc.goto_saved_pose("start")
-        rospy.logerr('Done')
+        rospy.logerr("Done")
         self.ROBOT_ERROR_DETECTED = False
 
     def __robot_state_callback(self, msg):
         self.robot_state = msg
         if any(self.robot_state.cartesian_collision):
             if not self.ROBOT_ERROR_DETECTED:
-                rospy.logerr('Detected Cartesian Collision')
+                rospy.logerr("Detected Cartesian Collision")
             self.ROBOT_ERROR_DETECTED = True
         for s in FrankaErrors.__slots__:
             if getattr(msg.current_errors, s):
                 self.stop()
                 if not self.ROBOT_ERROR_DETECTED:
-                    rospy.logerr('Robot Error Detected')
+                    rospy.logerr("Robot Error Detected")
                 self.ROBOT_ERROR_DETECTED = True
 
     def __execute_best_grasp(self):
-            self.cs.switch_controller('moveit')
+        self.cs.switch_controller("moveit")
 
-            best_grasp = rospy.wait_for_message("/ggrasp/predict", Grasp)
-            best_grasp = correct_grasp(best_grasp, self.gripper)
-            self.best_grasp = best_grasp
+        best_grasp = rospy.wait_for_message("/ggrasp/predict", Grasp)
+        best_grasp = correct_grasp(best_grasp, self.gripper)
+        self.best_grasp = best_grasp
 
-            tfh.publish_pose_as_transform(best_grasp.pose, 'panda_link0', 'G', 0.5)
-            # Offset for initial pose.
-            initial_offset = 0.05
-            gripper_width_offset = 0.03
+        tfh.publish_pose_as_transform(best_grasp.pose, "panda_link0", "G", 0.5)
+        # Offset for initial pose.
+        initial_offset = 0.05
+        gripper_width_offset = 0.03
 
-            # Add some limits, plus a starting offset.
-            # best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
-            best_grasp.pose.position.z += initial_offset + self.LINK_EE_OFFSET  # Offset from end effector position to
+        # Add some limits, plus a starting offset.
+        # best_grasp.pose.position.z = best_grasp.pose.position.z - 0.055
+        best_grasp.pose.position.z += (
+            initial_offset + self.LINK_EE_OFFSET
+        )  # Offset from end effector position to
 
-            self.pc.gripper.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
-            rospy.sleep(0.1)
-            self.pc.goto_pose(best_grasp.pose, velocity=0.1)
+        self.pc.gripper.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
+        rospy.sleep(0.1)
+        self.pc.goto_pose(best_grasp.pose, velocity=0.1)
 
-            # Reset the position
-            best_grasp.pose.position.z -= initial_offset + self.LINK_EE_OFFSET
+        # Reset the position
+        best_grasp.pose.position.z -= initial_offset + self.LINK_EE_OFFSET
 
-            self.cs.switch_controller('velocity')
-            v = Twist()
-            v.linear.z = -0.05
+        self.cs.switch_controller("velocity")
+        v = Twist()
+        v.linear.z = -0.05
 
-            # Monitor robot state and descend
-            while self.robot_state.O_T_EE[-2] > best_grasp.pose.position.z and not any(self.robot_state.cartesian_contact) and not self.ROBOT_ERROR_DETECTED:
-                self.curr_velo_pub.publish(v)
-                rospy.sleep(0.01)
-            
-            # Check for collisions
-            if self.ROBOT_ERROR_DETECTED:
-                return False
+        # Monitor robot state and descend
+        while (
+            self.robot_state.O_T_EE[-2] > best_grasp.pose.position.z
+            and not any(self.robot_state.cartesian_contact)
+            and not self.ROBOT_ERROR_DETECTED
+        ):
+            self.curr_velo_pub.publish(v)
+            rospy.sleep(0.01)
 
-            rospy.sleep(1)
-            self.cs.switch_controller('moveit')
-            # close the fingers.
-            rospy.sleep(0.2)
-            self.pc.gripper.grasp(0, force=1)
-            
-            # Sometimes triggered by closing on something that pushes the robot
-            if self.ROBOT_ERROR_DETECTED:
-                return False
-            
-            return True
+        # Check for collisions
+        if self.ROBOT_ERROR_DETECTED:
+            return False
+
+        rospy.sleep(1)
+        self.cs.switch_controller("moveit")
+        # close the fingers.
+        rospy.sleep(0.2)
+        self.pc.gripper.grasp(0, force=1)
+
+        # Sometimes triggered by closing on something that pushes the robot
+        if self.ROBOT_ERROR_DETECTED:
+            return False
+
+        return True
 
     def stop(self):
         self.pc.stop()
@@ -126,22 +147,23 @@ class PandaOpenLoopGraspController(object):
         self.curr_velo_pub.publish(self.curr_velo)
 
     def go(self):
-        self.cs.switch_controller('moveit')
+        self.cs.switch_controller("moveit")
         self.pc.goto_saved_pose("start")
         self.pc.gripper.set_gripper(0.1)
 
         grasp_ret = self.__execute_best_grasp()
         if not grasp_ret or self.ROBOT_ERROR_DETECTED:
-            rospy.logerr('Something went wrong, aborting this run')
+            rospy.logerr("Something went wrong, aborting this run")
             if self.ROBOT_ERROR_DETECTED:
                 self.__recover_robot_from_error()
-        self.cs.switch_controller('moveit')
-        
+        self.cs.switch_controller("moveit")
+
         self.pc.goto_saved_pose("bin")
         self.pc.gripper.set_gripper(0.1)
         self.pc.goto_saved_pose("start")
 
-if __name__ == '__main__':
-    rospy.init_node('panda_open_loop_grasp')
+
+if __name__ == "__main__":
+    rospy.init_node("panda_open_loop_grasp")
     pg = PandaOpenLoopGraspController()
     pg.go()
