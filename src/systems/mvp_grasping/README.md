@@ -71,6 +71,14 @@ with:
 
     roslaunch mvp_grasping robot_bringup.launch gripper:=robotiq comport:=/dev/ttyUSB1
 
+and:
+
+    roslaunch ggrasp ggrasp_rt.launch
+
+with:
+
+    roslaunch ggrasp ggrasp_rt.launch gripper:=robotiq
+
 and the `rosrun` commands e.g.:
 
     rosrun mvp_grasping panda_closed_loop_grasp.py
@@ -123,7 +131,10 @@ TODO: Manually add the table/bin into the scene as collision objects
 ## Correcting grasp positions for different grippers
 
 The MoveIt uses `panda_link8` as the end-effector link. This link is rotated at
-a 45 degrees relative to the camera on the z-axis. Hence, when planning a grasp, it is necessary to first correct the grasp pose (see [MoveIt's Pick & Place Tutorial](https://ros-planning.github.io/moveit_tutorials/doc/pick_place/pick_place_tutorial.html#setting-grasp-pose)). This is where our `correct_grasp` function comes in. 
+a 45 degrees relative to the camera on the z-axis. Hence, when planning a grasp,
+it is necessary to first correct the grasp pose (see [MoveIt's Pick & Place
+Tutorial](https://ros-planning.github.io/moveit_tutorials/doc/pick_place/pick_place_tutorial.html#setting-grasp-pose)).
+This is where our `correct_grasp` function comes in.
 
 Somehow computing the TF transform between `panda_EE` and `panda_link8`, and
 using the translation and rotation from there results in the planner failing
