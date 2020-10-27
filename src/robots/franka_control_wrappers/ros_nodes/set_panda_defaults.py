@@ -31,7 +31,7 @@ if gripper == "panda":
     gripper_offset = 0.035
 elif gripper == "robotiq":
     # 245mm down for the gripper
-    gripper_offset = 0.142      # 0.245mm from flange to finger
+    gripper_offset = 0.20660000056
 
 else:
     raise ValueError("Invalid gripper type")
