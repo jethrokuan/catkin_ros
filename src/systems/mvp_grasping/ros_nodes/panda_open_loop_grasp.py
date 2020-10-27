@@ -87,7 +87,7 @@ class PandaOpenLoopGraspController(object):
         self.cs.switch_controller("moveit")
 
         self.best_grasp = rospy.wait_for_message("/ggrasp/predict", Grasp)
-        self.best_grasp = correct_grasp(best_grasp, self.gripper)
+        self.best_grasp = correct_grasp(self.best_grasp, self.gripper)
 
         tfh.publish_pose_as_transform(self.best_grasp.pose, "panda_link0", "G", 0.5)
         # Offset for initial pose.
