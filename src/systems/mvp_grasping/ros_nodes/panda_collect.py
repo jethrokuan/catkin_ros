@@ -41,7 +41,7 @@ class PandaCollectController(object):
         if self.gripper == "panda":
             self.LINK_EE_OFFSET = 0.1384
         elif self.gripper == "robotiq":
-            self.LINK_EE_OFFSET = 0.20660000056
+            self.LINK_EE_OFFSET = 0.32
 
         ggrasp_service_name = "/ggrasp"
         rospy.wait_for_service(ggrasp_service_name + "/predict")
