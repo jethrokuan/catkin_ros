@@ -32,6 +32,10 @@ class PandaOpenLoopGraspController(object):
 
     def __init__(self):
         self.gripper = rospy.get_param("~gripper", "panda")
+        if self.gripper == "panda":
+            self.LINK_EE_OFFSET = 0.1384
+        elif self.gripper == "robotiq":
+            self.LINK_EE_OFFSET = 0.245
 
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher(
@@ -90,18 +94,19 @@ class PandaOpenLoopGraspController(object):
         self.best_grasp = correct_grasp(self.best_grasp, self.gripper)
 
         tfh.publish_pose_as_transform(self.best_grasp.pose, "panda_link0", "G", 0.5)
+
         # Offset for initial pose.
-        initial_offset = 0.05
+        offset = 0.05 + self.LINK_EE_OFFSET
         gripper_width_offset = 0.03
 
-        self.best_grasp.pose.position.z += initial_offset
+        self.best_grasp.pose.position.z += offset
 
         self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset, wait=False)
         rospy.sleep(0.1)
         self.pc.goto_pose(self.best_grasp.pose, velocity=0.1)
 
         # Reset the position
-        self.best_grasp.pose.position.z -= initial_offset
+        self.best_grasp.pose.position.z -= offset
 
         self.cs.switch_controller("velocity")
         v = Twist()

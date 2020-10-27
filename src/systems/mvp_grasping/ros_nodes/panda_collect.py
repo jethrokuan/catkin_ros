@@ -38,7 +38,11 @@ class PandaCollectController(object):
 
     def __init__(self):
         gripper = rospy.get_param("~gripper", "panda")
-        
+        if self.gripper == "panda":
+            self.LINK_EE_OFFSET = 0.1384
+        elif self.gripper == "robotiq":
+            self.LINK_EE_OFFSET = 0.245
+
         ggrasp_service_name = "/ggrasp"
         rospy.wait_for_service(ggrasp_service_name + "/predict")
         self.ggrasp_srv = rospy.ServiceProxy(
@@ -124,16 +128,16 @@ class PandaCollectController(object):
         best_grasp.pose.orientation = q_new
 
         # Offset for initial pose.
-        initial_offset = 0.05
+        offset = 0.05 + self.LINK_EE_OFFSET
         gripper_width_offset = 0.03
         
-        best_grasp.pose.position.z += initial_offset
+        best_grasp.pose.position.z += offset
         self.pc.gripper.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
         rospy.sleep(0.1)
         self.pc.goto_pose(best_grasp.pose, velocity=0.1)
 
         # Reset the position
-        best_grasp.pose.position.z -= initial_offset
+        best_grasp.pose.position.z -= offset
 
         self.cs.switch_controller("velocity")
         v = Twist()
