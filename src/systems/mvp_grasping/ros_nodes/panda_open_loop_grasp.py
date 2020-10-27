@@ -86,23 +86,22 @@ class PandaOpenLoopGraspController(object):
     def __execute_best_grasp(self):
         self.cs.switch_controller("moveit")
 
-        best_grasp = rospy.wait_for_message("/ggrasp/predict", Grasp)
-        best_grasp = correct_grasp(best_grasp, self.gripper)
-        self.best_grasp = best_grasp
+        self.best_grasp = rospy.wait_for_message("/ggrasp/predict", Grasp)
+        self.best_grasp = correct_grasp(best_grasp, self.gripper)
 
-        tfh.publish_pose_as_transform(best_grasp.pose, "panda_link0", "G", 0.5)
+        tfh.publish_pose_as_transform(self.best_grasp.pose, "panda_link0", "G", 0.5)
         # Offset for initial pose.
         initial_offset = 0.05
         gripper_width_offset = 0.03
 
-        best_grasp.pose.position.z += intial_offset
+        self.best_grasp.pose.position.z += intial_offset
 
-        self.pc.gripper.set_gripper(best_grasp.width + gripper_width_offset, wait=False)
+        self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset, wait=False)
         rospy.sleep(0.1)
-        self.pc.goto_pose(best_grasp.pose, velocity=0.1)
+        self.pc.goto_pose(self.best_grasp.pose, velocity=0.1)
 
         # Reset the position
-        best_grasp.pose.position.z -= initial_offset
+        self.best_grasp.pose.position.z -= initial_offset
 
         self.cs.switch_controller("velocity")
         v = Twist()
@@ -110,7 +109,7 @@ class PandaOpenLoopGraspController(object):
 
         # Monitor robot state and descend
         while (
-            self.robot_state.O_T_EE[-2] > best_grasp.pose.position.z
+            self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
             and not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
         ):
@@ -151,6 +150,21 @@ class PandaOpenLoopGraspController(object):
         self.cs.switch_controller("moveit")
 
         self.pc.goto_saved_pose("bin")
+
+        self.cs.switch_controller("velocity")
+        v = Twist()
+        v.linear.z = -0.05
+
+        # Monitor robot state and descend
+        while (
+            self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
+            and not any(self.robot_state.cartesian_contact)
+            and not self.ROBOT_ERROR_DETECTED
+        ):
+            self.curr_velo_pub.publish(v)
+            rospy.sleep(0.01)
+        rospy.sleep(1)
+        self.cs.switch_controller("moveit")
         self.pc.gripper.set_gripper(0.1)
         self.pc.goto_saved_pose("start")
 
