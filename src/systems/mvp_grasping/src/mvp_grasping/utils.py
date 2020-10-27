@@ -11,8 +11,10 @@ def correct_grasp(grasp, gripper):
     """
     if gripper == "robotiq":
         angle = np.pi / 2
+        link_ee_offset = 0.245 
     elif gripper == "panda":
         angle = np.pi / 4
+        link_ee_offset = 0.1384
     else:
         raise ValueError("Unsupported gripper: {}".format(gripper))
 
@@ -21,5 +23,6 @@ def correct_grasp(grasp, gripper):
         tft.quaternion_multiply(tfh.quaternion_to_list(grasp.pose.orientation), q_rot)
     )
     grasp.pose.orientation = q_new
+    grasp.pose.position.z += link_ee_offset
 
     return grasp
