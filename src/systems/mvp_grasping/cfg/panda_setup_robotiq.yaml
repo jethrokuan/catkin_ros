@@ -1,0 +1,17 @@
+saved_joint_values:
+  start:
+    panda_joint1: 0.014346704367107235
+    panda_joint2: -0.08199216431693027
+    panda_joint3: -0.04014778174214698
+    panda_joint4: -1.744772718379372  
+    panda_joint5: 0.030485444426536557
+    panda_joint6: 1.670511910641046   
+    panda_joint7: 1.5313037919840877
+  bin:
+    panda_joint1: 0.014346704367107235
+    panda_joint2: -0.08199216431693027
+    panda_joint3: -0.04014778174214698
+    panda_joint4: -1.744772718379372  
+    panda_joint5: 0.030485444426536557
+    panda_joint6: 1.670511910641046   
+    panda_joint7: 1.5313037919840877
