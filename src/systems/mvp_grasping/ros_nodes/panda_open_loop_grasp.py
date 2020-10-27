@@ -94,7 +94,7 @@ class PandaOpenLoopGraspController(object):
         initial_offset = 0.05
         gripper_width_offset = 0.03
 
-        self.best_grasp.pose.position.z += intial_offset
+        self.best_grasp.pose.position.z += initial_offset
 
         self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset, wait=False)
         rospy.sleep(0.1)
