@@ -7,7 +7,7 @@
 
   <!-- Set some project specific defaults for the panda arm. -->
   <rosparam if="$(eval arg('gripper') == 'panda')" command="load" file="$(find mvp_grasping)/cfg/panda_setup.yaml" ns="/panda_setup"/>
-  <rosparam if="$(eval arg('gripper') == 'robotiq)" command="load" file="$(find mvp_grasping)/cfg/panda_setup_robotiq.yaml" ns="/panda_setup"/>
+  <rosparam if="$(eval arg('gripper') == 'robotiq')" command="load" file="$(find mvp_grasping)/cfg/panda_setup_robotiq.yaml" ns="/panda_setup"/>
   <node name="set_robot_defaults" pkg="franka_control_wrappers" type="set_panda_defaults.py"  respawn="false" output="screen">
     <param name="gripper" type="str" value="$(arg gripper)"/>
   </node>
