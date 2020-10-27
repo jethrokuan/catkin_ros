@@ -86,6 +86,20 @@ and the `rosrun` commands e.g.:
 with:
 
     rosrun mvp_grasping panda_closed_loop_grasp.py _gripper:=robotiq
+    
+### What's different underneath?
+
+To set up the system for a different gripper, one will have to:
+
+1. Tweak
+   [set_panda_defaults.py](../../franka_control_wrappers/ros_nodes/set_panda_defaults.py).
+   The `gripper_offset` needs to be set such that the resultant `panda_EE` TF
+   frame is at the center of the gripper.
+2. Tweak [ggrasp_rt.py](../../src/algorithms/ggrasp/ros_nodes/ggrasp_rt.py). For
+   some camera mount configurations, the gripper may come into camera view and
+   result in bad quality network outputs that need to be masked away.
+3. Tweak [panda_setup.yml](cfg/panda_setup.yaml). The start and bin values are likely to be different for different grippers.
+4. Tweak the controller (e.g. [panda_open_loop_grasp.py](ros_nodes/panda_open_loop_grasp.py)). `LINK_EE_OFFSET` needs to be set to the z-distance between the gripper center and panda_link8, moveit's end-effector link.
 
 ## Data Collection
 
@@ -140,3 +154,9 @@ Somehow computing the TF transform between `panda_EE` and `panda_link8`, and
 using the translation and rotation from there results in the planner failing
 with "No motion plan found", despite the target pose being the same. See commit
 hash 031c6c3.
+
+## The Environment
+
+The depth image is affected by flicker (from lighting), as well as from
+reflective surfaces. Good performance is dependent on appropriate lighting
+conditions.
