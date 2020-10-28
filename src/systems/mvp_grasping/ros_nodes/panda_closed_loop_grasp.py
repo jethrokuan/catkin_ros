@@ -137,18 +137,26 @@ class PandaClosedLoopGraspController(object):
 
         return v
 
+    def target_to_pregrasp(self, pose):
+        pregrasp_pose = pose
+        pregrasp_pose.position.z += 0.05
+
+        return pregrasp_pose
+        
     def __execute_grasp(self):
         target_pose = None
+        pregrasp_pose = None
         while (
             self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
             and not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(target_pose) > self.max_dist_to_target
+            and self.dist_to_target(pregrasp_pose) > self.max_dist_to_target
         ):
             if not self.best_grasp:
                 break
             target_pose = self.best_grasp.pose
-            v = self.get_velocity(target_pose)
+            pregrasp_pose = self.target_to_pregrasp(target_pose)
+            v = self.get_velocity(pregrasp_pose)
             self.curr_velo_pub.publish(v)
             self.pc.gripper.set_gripper(self.best_grasp.width)
             rospy.sleep(0.01)
@@ -160,12 +168,25 @@ class PandaClosedLoopGraspController(object):
         while (
             not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(target_pose) > 0.1
+            and self.dist_to_target(pregrasp_pose) > 0.1
         ):
-            # We keep going until the height is right, rather than distance.
             v = self.get_velocity(target_pose)
             self.curr_velo_pub.publish(v)
             rospy.sleep(0.01)
+
+        while (
+            not any(self.robot_state.cartesian_contact)
+            and not self.ROBOT_ERROR_DETECTED
+            and self.dist_to_target(target_pose) > 0.1
+        ):
+            v = self.get_velocity(target_pose)
+            self.curr_velo_pub.publish(v)
+            rospy.sleep(0.01)
+
+
+        # Check for collisions
+        if self.ROBOT_ERROR_DETECTED:
+            return False      
 
         rospy.sleep(1)
         self.cs.switch_controller("moveit")
