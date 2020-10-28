@@ -144,51 +144,40 @@ class PandaClosedLoopGraspController(object):
         v.angular.z = v.angular.z
 
         return v
-
-    def target_to_pregrasp(self, pose):
-        pregrasp_pose = pose
-        pregrasp_pose.position.z += 0.05
-
-        return pregrasp_pose
-        
+    
     def __execute_grasp(self):
         target_pose = None
-        pregrasp_pose = None
+        dist_to_target = self.dist_to_target(target_pose) 
         gripper_width_offset = 0.03
         while (
             self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
             and not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(pregrasp_pose) > self.max_dist_to_target
+            and dist_to_target > 0.005
         ):
             if not self.best_grasp:
                 break
-            target_grasp = correct_grasp(self.best_grasp, self.gripper)
-            target_pose = target_grasp.pose
-            pregrasp_pose = self.target_to_pregrasp(target_pose)
-            pregrasp_pose.position.z += self.LINK_EE_OFFSET
-            v = self.get_velocity(pregrasp_pose)
+            if dist_to_target > self.max_dist_to_target:
+                target_grasp = correct_grasp(self.best_grasp, self.gripper)
+                target_pose = target_grasp.pose
+                target_pose.position.z += 0.05 + self.LINK_EE_OFFSET
+            v = self.get_velocity(target_pose)
             self.curr_velo_pub.publish(v)
             self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset)
+            dist_to_target = self.dist_to_target(target_pose)
+                
             rospy.sleep(0.01)
 
         # Check for collisions
         if self.ROBOT_ERROR_DETECTED:
             return False
 
+        target_pose.position.z -= 0.05 + self.LINK_EE_OFFSET
+        
         while (
             not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(pregrasp_pose) > 0.001
-        ):
-            v = self.get_velocity(pregrasp_pose)
-            self.curr_velo_pub.publish(v)
-            rospy.sleep(0.01)
-
-        while (
-            not any(self.robot_state.cartesian_contact)
-            and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(target_pose) > 0.001
+            and self.dist_to_target(target_pose) > 0.005
         ):
             v = self.get_velocity(target_pose)
             self.curr_velo_pub.publish(v)
