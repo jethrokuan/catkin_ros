@@ -12,4 +12,4 @@
 	url = https://github.com/frankaemika/libfranka
 [submodule "src/robots/robotiq"]
 	path = src/robots/robotiq
-	url = https://github.com/ros-industrial/robotiq
+	url = https://github.com/clear-nus/robotiq
