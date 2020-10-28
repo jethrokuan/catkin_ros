@@ -76,8 +76,7 @@ class GGraspRt:
 
         invalid_mask = np.zeros((300, 300)).astype("bool")
         if self.gripper == "robotiq":
-            invalid_mask[:100, :100] = True
-            invalid_mask[:100, 200:] = True
+            invalid_mask[:100, :] = True
 
         points[invalid_mask] = 0
 
