@@ -40,7 +40,7 @@ class PandaClosedLoopGraspController(object):
             "/ggrasp/predict", Grasp, self.grasp_cmd_callback, queue_size=1
         )
         self.max_dist_to_target = 0.3  # distance to target to stop updating target pose
-        self.linear_velo = 0.03
+        self.linear_velo = 0.1
 
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
