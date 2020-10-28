@@ -43,11 +43,11 @@ class PandaCommander(object):
         self.saved_joint_poses[name] = joint_values
         return
 
-    def goto_saved_pose(self, name):
+    def goto_saved_pose(self, name, velocity=1.0):
         joint_values = self.saved_joint_poses.get(name, None)
         if joint_values is None:
             raise ValueError("Cannot find saved pose: {}".format(name))
-        self.goto_joints(joint_values)
+        self.goto_joints(joint_values, velocity=velocity)
             
     def print_debug_info(self):
         if self.active_group:
@@ -78,7 +78,7 @@ class PandaCommander(object):
                 self.groups[group_name] = moveit_commander.MoveGroupCommander(group_name)
             self.active_group = self.groups[group_name]
 
-    def goto_joints(self, joint_values, group_name=None, wait=True):
+    def goto_joints(self, joint_values, velocity=1.0, group_name=None, wait=True):
         """
         Move to joint positions.
         :param joint_values:  Array of joint positions
@@ -97,6 +97,7 @@ class PandaCommander(object):
         for i, v in enumerate(joint_values):
             joint_goal[i] = v
 
+        self.active_group.set_max_velocity_scaling_factor(velocity)
         success = self.active_group.go(joint_goal, wait)
         self.active_group.stop()
         return success

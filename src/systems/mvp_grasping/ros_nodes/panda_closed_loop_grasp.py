@@ -146,6 +146,7 @@ class PandaClosedLoopGraspController(object):
     def __execute_grasp(self):
         target_pose = None
         pregrasp_pose = None
+        gripper_width_offset = 0.03
         while (
             self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
             and not any(self.robot_state.cartesian_contact)
@@ -158,7 +159,7 @@ class PandaClosedLoopGraspController(object):
             pregrasp_pose = self.target_to_pregrasp(target_pose)
             v = self.get_velocity(pregrasp_pose)
             self.curr_velo_pub.publish(v)
-            self.pc.gripper.set_gripper(self.best_grasp.width)
+            self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset)
             rospy.sleep(0.01)
 
         # Check for collisions
@@ -207,7 +208,7 @@ class PandaClosedLoopGraspController(object):
 
     def go(self):
         self.cs.switch_controller("moveit")
-        self.pc.goto_saved_pose("start")
+        self.pc.goto_saved_pose("start", velocity=0.1)
         self.pc.gripper.set_gripper(0.1)
         self.cs.switch_controller("velocity")
         grasp_ret = self.__execute_grasp()
@@ -215,9 +216,9 @@ class PandaClosedLoopGraspController(object):
             rospy.logerr("Something went wrong, aborting this run")
             if self.ROBOT_ERROR_DETECTED:
                 self.__recover_robot_from_error()
-        self.pc.goto_saved_pose("bin")
+        self.pc.goto_saved_pose("bin", velocity=0.1)
         self.pc.gripper.set_gripper(0.1)
-        self.pc.goto_saved_pose("start")
+        self.pc.goto_saved_pose("start", velocity=0.1)
 
 
 if __name__ == "__main__":
