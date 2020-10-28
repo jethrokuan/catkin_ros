@@ -102,9 +102,10 @@ class PandaClosedLoopGraspController(object):
                     rospy.logerr("Robot Error Detected")
                 self.ROBOT_ERROR_DETECTED = True
 
-    def dist_to_target(self, target_pose):
-        if target_pose is None:
-            return 100000  # large number when there is no target
+    def dist_to_target(self, target_grasp):
+        if target_grasp is None:
+            return 100000 # large number when there is no target
+        target_pose = target_grasp.pose
         current_pose = self.pc.get_current_pose()
         x = target_pose.position.x - current_pose.position.x
         y = target_pose.position.y - current_pose.position.y
@@ -141,7 +142,7 @@ class PandaClosedLoopGraspController(object):
     
     def __execute_grasp(self):
         target_grasp = None
-        dist_to_target = self.dist_to_target(target_grasp.pose) 
+        dist_to_target = self.dist_to_target(target_grasp) 
         gripper_width_offset = 0.03
         while (
             self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
@@ -157,7 +158,7 @@ class PandaClosedLoopGraspController(object):
             v = self.get_velocity(target_grasp.pose)
             self.curr_velo_pub.publish(v)
             self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset)
-            dist_to_target = self.dist_to_target(target_grasp.pose)
+            dist_to_target = self.dist_to_target(target_grasp)
                 
             rospy.sleep(0.01)
 
@@ -170,7 +171,7 @@ class PandaClosedLoopGraspController(object):
         while (
             not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(target_grasp.pose) > 0.01
+            and self.dist_to_target(target_grasp) > 0.01
         ):
             v = self.get_velocity(target_grasp.pose)
             self.curr_velo_pub.publish(v)
