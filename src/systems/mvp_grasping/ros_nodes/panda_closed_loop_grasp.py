@@ -143,7 +143,7 @@ class PandaClosedLoopGraspController(object):
     def __execute_grasp(self):
         target_grasp = None
         dist_to_target = self.dist_to_target(target_grasp) 
-        gripper_width_offset = 0.03
+        gripper_width_offset = 0.01
         while (
             self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
             and not any(self.robot_state.cartesian_contact)
