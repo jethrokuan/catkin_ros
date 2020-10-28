@@ -165,8 +165,8 @@ class PandaClosedLoopGraspController(object):
                 break
             target_grasp = correct_grasp(self.best_grasp, self.gripper)
             target_pose = target_grasp.pose
-            target_pose.position.z += self.LINK_EE_OFFSET
             pregrasp_pose = self.target_to_pregrasp(target_pose)
+            pregrasp_pose.position.z += self.LINK_EE_OFFSET
             v = self.get_velocity(pregrasp_pose)
             self.curr_velo_pub.publish(v)
             self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset)
