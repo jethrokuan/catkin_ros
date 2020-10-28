@@ -15,6 +15,7 @@ from geometry_msgs.msg import Twist
 from franka_msgs.msg import FrankaState, Errors as FrankaErrors
 import tf.transformations as tft
 
+from mvp_grasping.utils import correct_grasp
 from franka_control_wrappers.panda_commander import PandaCommander
 
 import dougsm_helpers.tf_helpers as tfh
@@ -30,6 +31,12 @@ class PandaClosedLoopGraspController(object):
 
     def __init__(self):
         gripper = rospy.get_param("~gripper", "panda")
+        self.gripper = rospy.get_param("~gripper", "panda")
+        if self.gripper == "panda":
+            self.LINK_EE_OFFSET = 0.1384
+        elif self.gripper == "robotiq":
+            self.LINK_EE_OFFSET = 0.32
+
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher(
             "/cartesian_velocity_node_controller/cartesian_velocity",
@@ -156,7 +163,9 @@ class PandaClosedLoopGraspController(object):
         ):
             if not self.best_grasp:
                 break
-            target_pose = self.best_grasp.pose
+            target_grasp = correct_grasp(self.best_grasp.pose, self.gripper)
+            target_pose = target_grasp.pose
+            target_pose.position.z += self.LINK_EE_OFFSET
             pregrasp_pose = self.target_to_pregrasp(target_pose)
             v = self.get_velocity(pregrasp_pose)
             self.curr_velo_pub.publish(v)
@@ -179,7 +188,7 @@ class PandaClosedLoopGraspController(object):
         while (
             not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(target_pose) > 0.02
+            and self.dist_to_target(target_pose) > 0.001
         ):
             v = self.get_velocity(target_pose)
             self.curr_velo_pub.publish(v)
