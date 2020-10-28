@@ -15,7 +15,6 @@ from geometry_msgs.msg import Twist
 from franka_msgs.msg import FrankaState, Errors as FrankaErrors
 import tf.transformations as tft
 
-from mvp_grasping.utils import correct_grasp
 from franka_control_wrappers.panda_commander import PandaCommander
 
 import dougsm_helpers.tf_helpers as tfh
@@ -30,13 +29,8 @@ class PandaClosedLoopGraspController(object):
     """
 
     def __init__(self):
-        gripper = rospy.get_param("~gripper", "panda")
         self.gripper = rospy.get_param("~gripper", "panda")
-        if self.gripper == "panda":
-            self.LINK_EE_OFFSET = 0.1384
-        elif self.gripper == "robotiq":
-            self.LINK_EE_OFFSET = 0.32
-
+        
         self.curr_velocity_publish_rate = 100.0  # Hz
         self.curr_velo_pub = rospy.Publisher(
             "/cartesian_velocity_node_controller/cartesian_velocity",
@@ -59,7 +53,7 @@ class PandaClosedLoopGraspController(object):
             }
         )
         self.cs.switch_controller("velocity")
-        self.pc = PandaCommander(group_name="panda_arm", gripper=gripper)
+        self.pc = PandaCommander(group_name="panda_arm", gripper=self.gripper)
 
         self.robot_state = None
         self.ROBOT_ERROR_DETECTED = False
@@ -146,8 +140,8 @@ class PandaClosedLoopGraspController(object):
         return v
     
     def __execute_grasp(self):
-        target_pose = None
-        dist_to_target = self.dist_to_target(target_pose) 
+        target_grasp = None
+        dist_to_target = self.dist_to_target(target_grasp.pose) 
         gripper_width_offset = 0.03
         while (
             self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
@@ -158,13 +152,12 @@ class PandaClosedLoopGraspController(object):
             if not self.best_grasp:
                 break
             if dist_to_target > self.max_dist_to_target:
-                target_grasp = correct_grasp(self.best_grasp, self.gripper)
-                target_pose = target_grasp.pose
-                target_pose.position.z += 0.05 + self.LINK_EE_OFFSET
-            v = self.get_velocity(target_pose)
+                target_grasp = self.best_grasp
+                target_grasp.pose.position.z += 0.05
+            v = self.get_velocity(target_grasp.pose)
             self.curr_velo_pub.publish(v)
             self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset)
-            dist_to_target = self.dist_to_target(target_pose)
+            dist_to_target = self.dist_to_target(target_grasp.pose)
                 
             rospy.sleep(0.01)
 
@@ -172,14 +165,14 @@ class PandaClosedLoopGraspController(object):
         if self.ROBOT_ERROR_DETECTED:
             return False
 
-        target_pose.position.z -= 0.05 + self.LINK_EE_OFFSET
+        target_grasp.pose.position.z -= 0.05
         
         while (
             not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(target_pose) > 0.01
+            and self.dist_to_target(target_grasp.pose) > 0.01
         ):
-            v = self.get_velocity(target_pose)
+            v = self.get_velocity(target_grasp.pose)
             self.curr_velo_pub.publish(v)
             rospy.sleep(0.01)
 
