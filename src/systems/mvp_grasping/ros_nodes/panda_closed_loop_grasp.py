@@ -163,7 +163,7 @@ class PandaClosedLoopGraspController(object):
         ):
             if not self.best_grasp:
                 break
-            target_grasp = correct_grasp(self.best_grasp.pose, self.gripper)
+            target_grasp = correct_grasp(self.best_grasp, self.gripper)
             target_pose = target_grasp.pose
             target_pose.position.z += self.LINK_EE_OFFSET
             pregrasp_pose = self.target_to_pregrasp(target_pose)
