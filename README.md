@@ -30,7 +30,7 @@ To ensure that every project in this repository can run, perform the following s
     cmake --build .
     cd ~/catkin_ros/
     rosdep install --from-paths src --ignore-src src -r -y --skip-keys libfranka
-    catkin_make_isolated -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=~/catkin_ros/src/robots/libfranka/build
+    catkin_make -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=~/catkin_ros/src/robots/libfranka/build
 
 
 # Future Tasks
