@@ -39,9 +39,8 @@ class PandaClosedLoopGraspController(object):
         self.grasp_sub = rospy.Subscriber(
             "/ggrasp/predict", Grasp, self.grasp_cmd_callback, queue_size=1
         )
-        self.max_velo = 0.10
         self.max_dist_to_target = 0.3  # distance to target to stop updating target pose
-        self.velo_scale = 0.15
+        self.linear_velo = 0.03
 
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
@@ -130,10 +129,12 @@ class PandaClosedLoopGraspController(object):
         )
         v.angular.z = target_euler[2] - current_euler[2]
 
-        v.linear.x = self.velo_scale * v.linear.x
-        v.linear.y = self.velo_scale * v.linear.y
-        v.linear.z = self.velo_scale * v.linear.z
-        v.angular.z = self.velo_scale * v.angular.z
+        scaling_factor = self.linear_velo * np.sqrt(v.linear.x **2 + v.linear.y ** 2 + v.linear.z **2)
+        v.linear.x = scaling_factor * v.linear.x
+        v.linear.y = scaling_factor * v.linear.y
+        v.linear.z = scaling_factor * v.linear.z
+        
+        v.angular.z = 0.15 * v.angular.z
 
         return v
 
@@ -169,9 +170,9 @@ class PandaClosedLoopGraspController(object):
         while (
             not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(pregrasp_pose) > 0.02
+            and self.dist_to_target(pregrasp_pose) > 0.001
         ):
-            v = self.get_velocity(target_pose)
+            v = self.get_velocity(pregrasp_pose)
             self.curr_velo_pub.publish(v)
             rospy.sleep(0.01)
 
