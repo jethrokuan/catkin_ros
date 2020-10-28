@@ -153,7 +153,7 @@ class PandaClosedLoopGraspController(object):
             self.robot_state.O_T_EE[-2] > self.best_grasp.pose.position.z
             and not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and dist_to_target > 0.005
+            and dist_to_target > 0.01
         ):
             if not self.best_grasp:
                 break
@@ -177,7 +177,7 @@ class PandaClosedLoopGraspController(object):
         while (
             not any(self.robot_state.cartesian_contact)
             and not self.ROBOT_ERROR_DETECTED
-            and self.dist_to_target(target_pose) > 0.005
+            and self.dist_to_target(target_pose) > 0.01
         ):
             v = self.get_velocity(target_pose)
             self.curr_velo_pub.publish(v)
