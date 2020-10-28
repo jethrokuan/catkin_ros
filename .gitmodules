@@ -15,7 +15,7 @@
 	url = https://github.com/clear-nus/robotiq
 [submodule "src/robots/biotac_driver"]
 	path = src/robots/biotac_driver
-	url = https://github.com/kth-ros-pkg/biotac_driver
+	url = https://github.com/jethrokuan/biotac_driver
 [submodule "src/algorithms/pid"]
 	path = src/algorithms/pid
 	url = https://github.com/tasbolat1/pid
