@@ -70,7 +70,7 @@ class PandaOpenLoopGraspController(object):
         rospy.logerr("Recovering")
         self.pc.recover()
         self.cs.switch_controller("moveit")
-        self.pc.goto_saved_pose("start")
+        self.pc.goto_saved_pose("start", velocity=0.1)
         rospy.logerr("Done")
         self.ROBOT_ERROR_DETECTED = False
 
@@ -144,7 +144,7 @@ class PandaOpenLoopGraspController(object):
 
     def go(self):
         self.cs.switch_controller("moveit")
-        self.pc.goto_saved_pose("start")
+        self.pc.goto_saved_pose("start", velocity=0.1)
         self.pc.gripper.set_gripper(0.1)
 
         grasp_ret = self.__execute_best_grasp()
@@ -154,7 +154,7 @@ class PandaOpenLoopGraspController(object):
                 self.__recover_robot_from_error()
         self.cs.switch_controller("moveit")
 
-        self.pc.goto_saved_pose("bin")
+        self.pc.goto_saved_pose("bin", velocity=0.1)
 
         self.cs.switch_controller("velocity")
         v = Twist()
@@ -171,7 +171,7 @@ class PandaOpenLoopGraspController(object):
         rospy.sleep(1)
         self.cs.switch_controller("moveit")
         self.pc.gripper.set_gripper(0.1)
-        self.pc.goto_saved_pose("start")
+        self.pc.goto_saved_pose("start", velocity=0.1)
 
 
 if __name__ == "__main__":

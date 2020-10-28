@@ -85,7 +85,7 @@ class PandaClosedLoopGraspController(object):
         rospy.logerr("Recovering")
         self.pc.recover()
         self.cs.switch_controller("moveit")
-        self.pc.goto_saved_pose("start")
+        self.pc.goto_saved_pose("start", velocity=0.1)
         rospy.logerr("Done")
         self.ROBOT_ERROR_DETECTED = False
 
