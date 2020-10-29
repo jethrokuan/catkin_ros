@@ -157,7 +157,7 @@ class PandaClosedLoopGraspController(object):
                 target_grasp.pose.position.z += 0.05
             v = self.get_velocity(target_grasp.pose)
             self.curr_velo_pub.publish(v)
-            self.pc.gripper.set_gripper(self.best_grasp.width + gripper_width_offset)
+            self.pc.gripper.set_gripper(target_grasp.width + gripper_width_offset)
             dist_to_target = self.dist_to_target(target_grasp)
                 
             rospy.sleep(0.01)
