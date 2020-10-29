@@ -153,6 +153,7 @@ class PandaClosedLoopGraspController(object):
             if not self.best_grasp:
                 break
             if dist_to_target > self.max_dist_to_target:
+                target_grasp = self.best_grasp
                 target_grasp.pose.position.z += 0.05
             v = self.get_velocity(target_grasp.pose)
             self.curr_velo_pub.publish(v)
