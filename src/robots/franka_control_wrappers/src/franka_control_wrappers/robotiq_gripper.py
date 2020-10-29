@@ -37,6 +37,7 @@ class RobotiqGripper(BaseGripper):
         """
         tactile = rospy.get_param("~tactile", False)
         if tactile:
+            print("USING TACTILE FEEDBACK FOR GRASP")
             m = Bool()
             m.data = True
             publisher = rospy.Publisher('pid_enable', Bool, queue_size=10)
