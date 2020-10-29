@@ -18,9 +18,7 @@ class PID_HELPER():
 
         self.input_topic = rospy.get_param("~input", "input")
         self.output_topic = rospy.get_param("~output", "output")
-        print(self.input_topic)
-        print(self.output_topic)
-
+        
         self.state=0
         self.current_pos=0
         rospy.init_node('pid_helper')
