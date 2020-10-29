@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from biotac_sensors.msg import SignedBioTacHand
-from std_msgs.msg import Float64, Bool, String
+from std_msgs.msg import Float64, Bool, String, Empty
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_output as outputMsg
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inputMsg
 
@@ -26,6 +26,7 @@ class PID_HELPER():
         self.pub_goal = rospy.Publisher('setpoint', Float64, queue_size=100)
         self.pub_plant = rospy.Publisher(self.output_topic, outputMsg.Robotiq2FGripper_robot_output, queue_size=100)
         self.pub_pid_start = rospy.Publisher('pid_enable', Bool, queue_size=100)
+        self.pub_pid_done = rospy.Publisher('pid_done', Empty, queue_size=100)
         rospy.Subscriber(self.input_topic, inputMsg.Robotiq2FGripper_robot_input, self.getStatus)
 
         # command to be sent
@@ -75,11 +76,10 @@ class PID_HELPER():
         self.state = data.bt_data[0].pdc_data
 
         if (abs(self.state - self.GOAL) < self.TOLERANCE) and (self.TOLERANCE_QTY != 0):
-            #self.state = self.GOAL
-            #self.pub_pid_start.publish(Bool(data=0)) 
             self.TOLERANCE_QTY -= 1
         if self.TOLERANCE_QTY == 0:
             self.pub_pid_start.publish(Bool(data=0))
+            self.pub_pid_done.publish(Empty())
 
         self.pub.publish(self.state)
 
