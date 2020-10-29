@@ -1,4 +1,6 @@
 <launch>
+    <node name="biotac_pub" pkg="biotac_sensors" type="biotac_pub" output="screen" />
+    <node name="biotac_logger" pkg="biotac_logger" type="biotac_logger_v3.py" output="screen" />
     <node name="tactile_pid" pkg="pid" type="controller" output="screen" >
       <param name="Kp" value="0.03" /> <!-- 0.02 stopped to work -->
       <param name="Ki" value="0.06" />
