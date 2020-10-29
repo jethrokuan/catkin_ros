@@ -16,7 +16,6 @@ from franka_msgs.msg import FrankaState, Errors as FrankaErrors
 import tf.transformations as tft
 
 from franka_control_wrappers.panda_commander import PandaCommander
-from mvp_grasping.utils import correct_grasp
 
 import dougsm_helpers.tf_helpers as tfh
 from dougsm_helpers.ros_control import ControlSwitcher
@@ -154,7 +153,6 @@ class PandaClosedLoopGraspController(object):
             if not self.best_grasp:
                 break
             if dist_to_target > self.max_dist_to_target:
-                target_grasp = correct_grasp(self.best_grasp, self.gripper)
                 target_grasp.pose.position.z += 0.05
             v = self.get_velocity(target_grasp.pose)
             self.curr_velo_pub.publish(v)
