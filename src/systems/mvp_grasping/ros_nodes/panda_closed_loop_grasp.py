@@ -106,7 +106,7 @@ class PandaClosedLoopGraspController(object):
         if target_grasp is None:
             return 100000 # large number when there is no target
         target_pose = target_grasp.pose
-        current_pose = tfh.convert_pose("world", "panda_EE")
+        current_pose = tfh.current_robot_pose("panda_EE", "world")
         x = target_pose.position.x - current_pose.position.x
         y = target_pose.position.y - current_pose.position.y
         z = target_pose.position.z - current_pose.position.z
@@ -115,7 +115,7 @@ class PandaClosedLoopGraspController(object):
 
     def get_velocity(self, target_pose):
         """Returns the distance from the target grasp from the current pose."""
-        current_pose = tfh.convert_pose("world", "panda_EE")
+        current_pose = tfh.current_robot_pose("panda_EE", "world")
 
         v = Twist()
         v.linear.x = target_pose.position.x - current_pose.position.x
