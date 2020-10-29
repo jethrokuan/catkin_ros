@@ -3,7 +3,7 @@ import actionlib
 import control_msgs.msg
 import rospy
 
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Empty
 
 class RobotiqGripper(BaseGripper):
     def home_gripper(self):
