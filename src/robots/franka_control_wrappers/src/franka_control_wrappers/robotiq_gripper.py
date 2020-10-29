@@ -38,7 +38,7 @@ class RobotiqGripper(BaseGripper):
         tactile = rospy.get_param("~tactile", False)
         if tactile:
             m = Bool()
-            m.data = true
+            m.data = True
             publisher = rospy.Publisher('pid_enable', Bool, queue_size=10)
             publisher.publish(m)
             rospy.wait_for_message("pid_done", Empty)
