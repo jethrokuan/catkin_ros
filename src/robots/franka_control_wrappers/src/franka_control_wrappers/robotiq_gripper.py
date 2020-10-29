@@ -1,6 +1,7 @@
 from franka_control_wrappers.gripper import BaseGripper
 import actionlib
 import control_msgs.msg
+import rospy
 
 class RobotiqGripper(BaseGripper):
     def home_gripper(self):
@@ -32,4 +33,6 @@ class RobotiqGripper(BaseGripper):
         """
         Perform a grasp.
         """
+        topics = rospy.get_published_topics()
+        print(topics)
         return self.set_gripper(-0.01)
