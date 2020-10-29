@@ -32,5 +32,4 @@ class RobotiqGripper(BaseGripper):
         """
         Perform a grasp.
         """
-        print(rospy.get_published_topics())
         return self.set_gripper(-0.01)
