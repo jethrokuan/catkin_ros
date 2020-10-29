@@ -159,7 +159,6 @@ class PandaClosedLoopGraspController(object):
             self.curr_velo_pub.publish(v)
             self.pc.gripper.set_gripper(target_grasp.width + gripper_width_offset)
             dist_to_target = self.dist_to_target(target_grasp)
-                
             rospy.sleep(0.01)
 
         # Check for collisions

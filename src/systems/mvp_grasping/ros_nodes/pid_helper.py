@@ -16,8 +16,8 @@ class PID_HELPER():
         self.TOLERANCE = 10
         self.TOLERANCE_QTY = 10
 
-        self.input_topic = rospy.get_param("~input", "Robotiq2FGripperRobotInput")
-        self.output_topic = rospy.get_param("~output", "Robotiq2FGripperRobotOutput")
+        self.input_topic = rospy.get_param("~input", "input")
+        self.output_topic = rospy.get_param("~output", "output")
 
         self.state=0
         self.current_pos=0

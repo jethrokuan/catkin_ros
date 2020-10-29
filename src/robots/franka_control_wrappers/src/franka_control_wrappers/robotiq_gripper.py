@@ -3,6 +3,8 @@ import actionlib
 import control_msgs.msg
 import rospy
 
+from std_msgs.msg import Bool
+
 class RobotiqGripper(BaseGripper):
     def home_gripper(self):
         """
@@ -33,6 +35,14 @@ class RobotiqGripper(BaseGripper):
         """
         Perform a grasp.
         """
-        topics = rospy.get_published_topics()
-        print(topics)
-        return self.set_gripper(-0.01)
+        tactile = rospy.get_param("~tactile", "false")
+        print(tactile)
+        if tactile == "true":
+            m = Bool()
+            m.data = true
+            publisher = rospy.Publisher('pid_enable', Bool, queue_size=10)
+            publisher.publish(m)
+            rospy.wait_for_message("pid_enable", Bool)
+            return True
+        else:
+            return self.set_gripper(-0.01)
