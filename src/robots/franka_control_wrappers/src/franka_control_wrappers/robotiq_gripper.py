@@ -41,7 +41,7 @@ class RobotiqGripper(BaseGripper):
             m.data = true
             publisher = rospy.Publisher('pid_enable', Bool, queue_size=10)
             publisher.publish(m)
-            rospy.wait_for_message("pid_enable", Bool)
+            rospy.wait_for_message("pid_done", Empty)
             return True
         else:
             return self.set_gripper(-0.01)
