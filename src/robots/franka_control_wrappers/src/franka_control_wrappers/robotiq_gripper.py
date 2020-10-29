@@ -35,8 +35,8 @@ class RobotiqGripper(BaseGripper):
         """
         Perform a grasp.
         """
-        tactile = rospy.get_param("~tactile", False)
-        if tactile:
+        tactile = rospy.get_param("~tactile", "no")
+        if tactile == "y":
             print("USING TACTILE FEEDBACK FOR GRASP")
             m = Bool()
             m.data = True
