@@ -6,6 +6,9 @@ import rospy
 from std_msgs.msg import Bool, Empty
 
 class RobotiqGripper(BaseGripper):
+    def __init__(self):
+        self.pid_pub = rospy.Publisher('/pid_enable', Bool, queue_size=10)
+
     def home_gripper(self):
         """
         Home and initialise the gripper
@@ -37,9 +40,8 @@ class RobotiqGripper(BaseGripper):
         """
         tactile = rospy.get_param("~tactile", "no")
         if tactile == "y":
-            print("USING TACTILE FEEDBACK FOR GRASP")
-            publisher = rospy.Publisher('/pid_enable', Bool, queue_size=10)
-            publisher.publish(data=True)
+            print("USING TACTILE FEEDBACK FOR GRASP") 
+            self.pid_pub.publish(Bool(data=True))
             rospy.wait_for_message("/pid_done", Empty)
             return True
         else:
