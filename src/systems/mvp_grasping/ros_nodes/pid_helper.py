@@ -6,7 +6,7 @@ from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_output as out
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inputMsg
 
 
-
+TOLERANCE_QTY = 10
 # reset and activate
 
 
@@ -14,10 +14,12 @@ class PID_HELPER():
     def __init__(self):
         self.GOAL = 80 # in terms of desired pressure 230, 80
         self.TOLERANCE = 10
-        self.TOLERANCE_QTY = 10
+        self.TOLERANCE_QTY = TOLERANCE_QTY
 
         self.input_topic = rospy.get_param("~input", "input")
         self.output_topic = rospy.get_param("~output", "output")
+        # self.input_topic = rospy.get_param("~input", "Robotiq2FGripperRobotInput")
+        # self.output_topic = rospy.get_param("~output", "Robotiq2FGripperRobotOutput")
         
         self.state=0
         self.current_pos=0
@@ -80,6 +82,7 @@ class PID_HELPER():
         if self.TOLERANCE_QTY == 0:
             self.pub_pid_start.publish(Bool(data=0))
             self.pub_pid_done.publish(Empty())
+            self.TOLERANCE_QTY = TOLERANCE_QTY
 
         self.pub.publish(self.state)
 
