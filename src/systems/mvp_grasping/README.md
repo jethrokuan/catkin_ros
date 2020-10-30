@@ -87,6 +87,20 @@ with:
 
     rosrun mvp_grasping panda_closed_loop_grasp.py _gripper:=robotiq
     
+# Running with the Robotiq Gripper with Tactile Feedback
+
+Run in addition:
+
+``` sh
+roslaunch mvp_grasping tactile_pid.launch
+```
+
+And run the controller with `_tactile:=y`:
+
+``` sh
+rosrun mvp_grasping panda_closed_loop_grasp.py _gripper:=robotiq _tactile:=y
+```
+ 
 ### What's different underneath?
 
 To set up the system for a different gripper, one will have to:
